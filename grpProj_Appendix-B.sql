@@ -47,6 +47,7 @@ SELECT STR_TO_DATE(covid19data.date, '%Y-%c-%d') AS date, CAST(IFNULL(NULLIF(new
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. #######
 ##########################################################################################################################################################################################
 
+
 ##############################################################################################################################################################################################################################################################
 ####### 10.	Vaccination Effects. Specific to Germany, on a daily basis, based on the total number of accumulated vaccinations (sum of total_vaccinations of each vaccine in a day), generate the daily new cases after 21 days, 60 days, and 120 days. #######
 ##############################################################################################################################################################################################################################################################
