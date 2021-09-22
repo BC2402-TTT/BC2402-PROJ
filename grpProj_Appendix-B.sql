@@ -46,7 +46,20 @@ SELECT STR_TO_DATE(covid19data.date, '%Y-%c-%d') AS date, CAST(IFNULL(NULLIF(new
 ##########################################################################################################################################################################################
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. #######
 ##########################################################################################################################################################################################
-
+select distinct c.date, c.new_cases, c.vaccine,
+d20.D20_avail_vaccine, 
+d30.D30_avail_vaccine
+, d40.D40_avail_vaccine
+from 
+(select distinct str_to_date(cd.date,'%Y-%m-%d') as date, cd.new_cases, cm.vaccine, cm.total_vaccinations, date_add(str_to_date(cd.date,'%Y-%m-%d'), interval 20 DAY) AS DAY20, date_add(str_to_date(cd.date,'%Y-%m-%d'), interval 30 DAY) AS DAY30, date_add(str_to_date(cd.date,'%Y-%m-%d'), interval 40 DAY) AS DAY40
+FROM covid19data cd
+join country_vaccinations_by_manufacturer cm on cm.date = cd.date
+where cd.location = 'Germany'
+) c
+left join(select str_to_date(date,'%Y-%m-%d') as date, vaccine, total_vaccinations as D20_avail_vaccine from country_vaccinations_by_manufacturer where location = 'Germany') d20 on d20.date = c.DAY20 and d20.vaccine = c.vaccine
+left join(select str_to_date(date,'%Y-%m-%d') as date, vaccine, total_vaccinations as D30_avail_vaccine from country_vaccinations_by_manufacturer where location = 'Germany') d30 on d30.date = c.DAY30 and d30.vaccine = c.vaccine
+left join(select str_to_date(date,'%Y-%m-%d') as date, vaccine, total_vaccinations as D40_avail_vaccine from country_vaccinations_by_manufacturer where location = 'Germany') d40 on d40.date = c.DAY40 and d40.vaccine = c.vaccine
+;
 
 ##############################################################################################################################################################################################################################################################
 ####### 10.	Vaccination Effects. Specific to Germany, on a daily basis, based on the total number of accumulated vaccinations (sum of total_vaccinations of each vaccine in a day), generate the daily new cases after 21 days, 60 days, and 120 days. #######
