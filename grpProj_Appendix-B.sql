@@ -3,11 +3,13 @@
 #########################################################
 SELECT SUM(population) AS total_population_in_asia FROM (SELECT MAX(CAST(IFNULL(NULLIF(population, ''), 0.0) AS DECIMAL(11,1))) AS population FROM covid19data WHERE continent = 'Asia' GROUP BY location) AS subquery;
 
+SELECT SUM(population) AS total_population_in_asia FROM (SELECT population FROM covid19data WHERE continent = 'Asia' GROUP BY location) AS subquery;
 ###############################################################################
 ####### 2.	What is the total population among the ten ASEAN countries? #######
 ###############################################################################
 SELECT SUM(population) AS total_asean_population_top_ten FROM (SELECT MAX(CAST(IFNULL(NULLIF(population, ''), 0.0) AS DECIMAL(11,1))) AS population FROM covid19data WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam') GROUP BY location ORDER BY MAX(CAST(IFNULL(NULLIF(population, ''), 0.0) AS DECIMAL(11,1))) DESC LIMIT 10) AS subquery;
 
+SELECT SUM(population) AS total_asean_population_top_ten FROM (SELECT population FROM covid19data WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam') GROUP BY location ORDER BY population) AS subquery;
 #########################################################################
 ####### 3.	Generate a list of unique data sources (source_name). #######
 #########################################################################
