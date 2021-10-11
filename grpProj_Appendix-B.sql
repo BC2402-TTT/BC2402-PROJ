@@ -51,9 +51,9 @@ SELECT STR_TO_DATE(covid19data.date, '%Y-%c-%d') AS date, CAST(IFNULL(NULLIF(new
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. #######
 ##########################################################################################################################################################################################
 select distinct c.date, c.new_cases, c.vaccine,
-d20.D20_avail_vaccine, 
-d30.D30_avail_vaccine
-, d40.D40_avail_vaccine
+d20.D20_avail_vaccine-c.total_vaccinations as D20_vaccine, 
+d30.D30_avail_vaccine-c.total_vaccinations as D30_vaccine
+, d40.D40_avail_vaccine-c.total_vaccinations as D40_vaccine
 from 
 (select distinct str_to_date(cd.date,'%Y-%m-%d') as date, cd.new_cases, cm.vaccine, cm.total_vaccinations, date_add(str_to_date(cd.date,'%Y-%m-%d'), interval 20 DAY) AS DAY20, date_add(str_to_date(cd.date,'%Y-%m-%d'), interval 30 DAY) AS DAY30, date_add(str_to_date(cd.date,'%Y-%m-%d'), interval 40 DAY) AS DAY40
 FROM covid19data cd
