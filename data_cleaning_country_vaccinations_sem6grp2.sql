@@ -1,0 +1,2 @@
+SELECT COLUMN_NAME, DATA_TYPE from INFORMATION_SCHEMA.COLUMNS
+WHERE table_name = "country_vaccinations";
