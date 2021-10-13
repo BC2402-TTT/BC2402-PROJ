@@ -68,4 +68,54 @@ left join(select str_to_date(date,'%Y-%m-%d') as date, vaccine, total_vaccinatio
 ##############################################################################################################################################################################################################################################################
 ####### 10.	Vaccination Effects. Specific to Germany, on a daily basis, based on the total number of accumulated vaccinations (sum of total_vaccinations of each vaccine in a day), generate the daily new cases after 21 days, 60 days, and 120 days. #######
 ##############################################################################################################################################################################################################################################################
-
+CREATE VIEW ger_vaccinations AS
+    SELECT 
+        cd.date,
+        cd.new_cases,
+        cv.total_vaccinations,
+        cv.vaccine,
+        DATE_ADD(STR_TO_DATE(cd.date, '%Y-%m-%d'),
+            INTERVAL 21 DAY) AS d21,
+        DATE_ADD(STR_TO_DATE(cd.date, '%Y-%m-%d'),
+            INTERVAL 60 DAY) AS d60,
+        DATE_ADD(STR_TO_DATE(cd.date, '%Y-%m-%d'),
+            INTERVAL 120 DAY) AS d120
+    FROM
+        covid19data cd,
+        country_vaccinations_by_manufacturer cv
+    WHERE
+        cd.location = cv.location
+            AND cv.date = cd.date
+            AND cd.location = 'Germany';
+            
+SELECT 
+    gv.date,
+    gv.new_cases,
+    gv.total_vaccinations,
+    gv.vaccine,
+    v2.new_cases AS aft21days,
+    v3.new_cases AS aft60days,
+    v4.new_cases AS aft120days
+FROM
+    ger_vaccinations gv
+        LEFT JOIN
+    (SELECT 
+        date, new_cases
+    FROM
+        covid19data
+    WHERE
+        location = 'Germany') v2 ON gv.d21 = v2.date
+        LEFT JOIN
+    (SELECT 
+        date, new_cases
+    FROM
+        covid19data
+    WHERE
+        location = 'Germany') v3 ON gv.d60 = v3.date
+        LEFT JOIN
+    (SELECT 
+        date, new_cases
+    FROM
+        covid19data
+    WHERE
+        location = 'Germany') v4 ON gv.d120 = v4.date;
