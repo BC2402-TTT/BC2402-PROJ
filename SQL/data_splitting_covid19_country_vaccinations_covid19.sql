@@ -61,8 +61,3 @@ CREATE TABLE disease AS SELECT
 	excess_mortality,
 	reproduction_rate
 FROM covid19data_sem6_grp2;
-
-DROP TABLE covid19data;
-DROP TABLE covid19data_sem6_grp2;
-DROP TABLE country_vaccinations;
-DROP TABLE country_vaccinations_sem6_grp2;

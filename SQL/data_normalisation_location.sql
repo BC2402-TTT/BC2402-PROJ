@@ -1,5 +1,5 @@
 # Create dimension table for country statistics
-CREATE TABLE location_sem6_grp2 AS SELECT 
+CREATE TABLE locations_sem6_grp2 AS SELECT 
 	location, iso_code, continent, population, population_density, median_age, aged_65_older, aged_70_older
     , gdp_per_capita, extreme_poverty, cardiovasc_death_rate, diabetes_prevalence, female_smokers, male_smokers
     , handwashing_facilities, hospital_beds_per_thousand, life_expectancy, human_development_index
@@ -32,7 +32,7 @@ ALTER TABLE country_vaccinations_sem6_grp2
 	DROP iso_code,
     RENAME COLUMN country TO location;
 
-SELECT * FROM location_sem6_grp2;
+SELECT * FROM locations_sem6_grp2;
 
 ####################################################################################
 
