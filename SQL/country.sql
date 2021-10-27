@@ -1,1 +1,0 @@
-SELECT * FROM covid19data_sem6_grp2;
