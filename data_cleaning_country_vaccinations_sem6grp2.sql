@@ -36,5 +36,3 @@ WHERE table_name = "country_vaccinations_sem6_grp2";
 
 # 5. Verify that the data values remain unchanged
 SELECT * FROM country_vaccinations_sem6_grp2;
-
-

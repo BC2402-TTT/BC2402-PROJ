@@ -1,8 +1,5 @@
 SELECT COLUMN_NAME, DATA_TYPE from INFORMATION_SCHEMA.COLUMNS
 WHERE table_name = "covid19data";
-# the datatype for all the columns are of "text" data_type.
-# this is incorrect, e.g. total_cases should be int, date should be datetime etc.
-# therefore, we need to change the datatypes
 
 # 1. Create a new table called "covid19data_sem6_grp2"
 # 2. Set all empty strings to NULL
@@ -54,7 +51,7 @@ CREATE TABLE covid19data_sem6_grp2 AS SELECT
     NULLIF(population,							'') as population,
     NULLIF(population_density,					'') as population_density,
 	NULLIF(median_age, 							'') as median_age,
-    NULLIF(aged_12_older,						'') as aged_12_older,
+    NULLIF(aged_65_older,						'') as aged_65_older,
     NULLIF(aged_70_older,						'') as aged_70_older,
 	NULLIF(gdp_per_capita, 						'') as gdp_per_capita,
     NULLIF(extreme_poverty,						'') as extreme_poverty,
