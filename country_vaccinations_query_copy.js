@@ -84,6 +84,27 @@ db.country_vaccinations_by_manufacturer.find({total_vaccinations: {$exists: true
 //verify that cleaning has been done, new columns of the appropriate datatype are created
 db.country_vaccinations_by_manufacturer.find() //columns that are cleaned are ended with _cleaned for consistency
 
+//formats a cleaned covid19data as output
+db.covid19data.aggregate([
+  { "$addFields": {
+    "data": {
+      "$map": {
+        "input": "$data",
+        "in": {
+          "$mergeObjects": [
+            "$$this",
+            {
+              "date_cleaned": {
+                "$toDate": "$$this.date"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }}
+])
+
 
 
 /* 1.	Display a list of total vaccinations per day in Singapore. 
