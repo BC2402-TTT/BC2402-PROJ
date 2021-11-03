@@ -3,11 +3,11 @@ CREATE TABLE locations AS SELECT
 	location, iso_code, continent, population, population_density, median_age, aged_65_older, aged_70_older
     , gdp_per_capita, extreme_poverty, cardiovasc_death_rate, diabetes_prevalence, female_smokers, male_smokers
     , handwashing_facilities, hospital_beds_per_thousand, life_expectancy, human_development_index
-FROM covid19data_sem6_grp2
+FROM covid19data_cleaned
 GROUP BY location;
 
 # Drop related data from covid19 table
-ALTER TABLE covid19data_sem6_grp2
+ALTER TABLE covid19data_cleaned
 	DROP iso_code, 
     DROP continent,
     DROP /*tests_units,*/ population, 
@@ -25,10 +25,10 @@ ALTER TABLE covid19data_sem6_grp2
     DROP hospital_beds_per_thousand, 
     DROP life_expectancy,
     DROP human_development_index;
-SELECT * FROM covid19data_sem6_grp2;
+SELECT * FROM covid19data_cleaned;
 
 # Drop related column from country_vaccinations and rename country column to location
-ALTER TABLE country_vaccinations_sem6_grp2
+ALTER TABLE country_vaccinations_cleaned
 	DROP iso_code,
     RENAME COLUMN country TO location;
 
@@ -97,13 +97,13 @@ SELECT
     #COUNT(DISTINCT life_expectancy)					 as life_expectancy,
 	#COUNT(DISTINCT human_development_index) 			 as human_development_index,
     COUNT(DISTINCT excess_mortality)					 as excess_mortality
-FROM covid19data_sem6_grp2
+FROM covid19data_cleaned
 GROUP BY location;
 
-SELECT 
+;SELECT 
 	location,
     COUNT(DISTINCT date),
     COUNT(DISTINCT source_name),
     COUNT(DISTINCT source_website)
-FROM country_vaccinations_sem6_grp2
+FROM country_vaccinations
 GROUP BY location;

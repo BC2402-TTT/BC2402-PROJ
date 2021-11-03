@@ -51,7 +51,7 @@ SELECT * FROM sources;
 SET SQL_SAFE_UPDATES = 1;
 
 DROP TABLE covid19data;
-DROP TABLE covid19data_sem6_grp2;
+DROP TABLE covid19data_cleaned;
 DROP TABLE country_vaccinations;
-DROP TABLE country_vaccinations_sem6_grp2;
+DROP TABLE country_vaccinations_cleaned;
 DROP TABLE country_vaccinations_by_manufacturer;
