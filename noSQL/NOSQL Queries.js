@@ -101,3 +101,90 @@ db.country_vaccinations_by_manufacturer.aggregate([
     ])
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Qn 11
+//db.gp1.aggregate([
+//    {$match:{continent:"Asia"}},
+//    {$group:{_id:{continent:"$continent"}, totalPopulation:{$sum:"$population"}}}])
+    
+db.gp2.aggregate([
+    {$match:{continent:"Asia"}},
+    {$group:{_id:{country:"$location"}, population:{$avg:"$population_cleaned"}}},
+    {$group:{_id:null, totalPopulation:{$sum:"$population"}}}
+    ])
+    
+
+db.gp2.aggregate([
+    {$match:{continent:"Asia"}},
+    {$project:{population_cleaned:1, location:1}}
+    {$group:{_id:{country:"$location"}, population:{$first:"$population_cleaned"}}}
+    {$group:{_id:null, totalPopulation:{$sum:"$population"}}}
+    ])
+    
+    
+//Qn12
+    
+db.gp2.aggregate([
+    {$match: {location: {$in: ["Brunei", "Cambodia", "Indonesia", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Vietnam"]}}},
+    {$group: {_id:{location:"$location"}, population:{$max:"$population_cleaned"}}},
+    {$group: {_id:null, totalPopulation:{$sum:"$population"}}}
+    ])
+
+//Qn13
+db.country_vac_clean.aggregate([
+    {$group: {_id:null, Unique_data_sources: {$addToSet: "$source_name"}}}])
+
+//Qn14
+db.country_vac_clean.aggregate([
+    {$match: { $and: [ {country: "Singapore"}, {date: {$gte:ISODate("2021-03-01"),$lt:ISODate("2021-04-01")}}]}},
+    {$project: {_id:0,date:1, daily_vaccinations:1}},
+    {$sort: {"date":1}}
+    
+//Qn15
+db.country_vac_clean.aggregate([
+    {$match: { $and: [ {country: "Singapore"}, {daily_vaccinations: {$gt: 0}}]}},
+    {$project: {date:1}},
+    {$limit:1}])
+    
+//Qn16    01-11 or 01-12
+db.gp1.aggregate([
+    {$match: {location: "Singapore"}},
+    {$unwind: "$data"},
+    {$match: {"data.date_cleaned": {$gte: ISODate("2021-01-12")}}}
+    {$group: {_id:null, total_new_cases:{$sum:"$data.new_cases"}}}
+    ])
+
+db.gp2.aggregate([
+    {$match: {location:"Singapore"}},
+    {$match: {"date_cleaned":  {$gte: ISODate("2021-01-12")}}}
+    {$group: {_id:null, total_new_cleaned:{$sum:"$new_cases_cleaned"}}}
+    ])
+//Qn17
+db.gp2.aggregate([
+    {$match: {location: "Singapore"}},
+    {$match: {"date_cleaned": {$lt: ISODate("2021-01-12")}}}
+    {$group: {_id:null, total_new_cases:{$sum:"$new_cases_cleaned"}}}
+    ])
+
+//Qn18
+db.gp2.aggregate([
+    {$match:{location:"Germany"}},
+    {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne:[]}}}
+    {$unwind: "$vaccinations_by_manufacturer_data"},
+    {$project:{ date:"$date", percentageOfNewCases:{$multiply:[ {$divide: ["$new_cases_cleaned", "$population_cleaned"]}, 100]},
+    vaccine: "$vaccinations_by_manufacturer_data.vaccine", totalVaccinations: "$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}}
+    ])
+
