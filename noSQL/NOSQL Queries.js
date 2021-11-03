@@ -47,6 +47,18 @@ db.country_vac_with_covid19data.aggregate(
                         startDate: {$min:"$date"},
                         endDate:{$max:"$date"},
                         unit:"day"}}}}
+						
+db.country_vac_with_covid19_data.aggregate(
+    {$match:{location: "Italy" }},
+    {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne:[]}}},
+    {$unwind:"$vaccinations_by_manufacturer_data"},
+    {$group:{_id:"$vaccinations_by_manufacturer_data.vaccine", date:{$min:"$date_cleaned"}}},
+    {$group:{_id:null, date:{ $addToSet: "$date"}}},
+    {$project: { date_diff:{$dateDiff:{
+                        startDate: {$min:"$date"},
+                        endDate:{$max:"$date"},
+                        unit:"day"}}}}
+)
 
 /* 6.	What is the country with the most types of administrated vaccine?
 [source table: country_vaccinations_by_manufacturer] */
