@@ -14,12 +14,11 @@ HAVING continent = 'Asia';
 ###############################################################################
 ####### 2.	What is the total population among the ten ASEAN countries? #######
 ###############################################################################
-SELECT SUM(population) AS total_asean_population_top_ten
-FROM (SELECT population
-	  FROM locations
-      WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam') 
-      GROUP BY location 
-      ORDER BY population) AS subquery;
+# The normalised "locations" table contains the population count for each country.
+# We then sum the populations of rows that are in ASEAN.
+SELECT SUM(population)
+FROM locations
+WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam')
 
 
 #########################################################################
@@ -85,7 +84,7 @@ AND date >=
 #########################################################################################################
 SELECT SUM(new_cases) AS new_cases
 FROM cases
-WHERE location = 'Singapore' AND DATE <= (
+WHERE location = 'Singapore' AND DATE < (
 	SELECT MIN(date)
 	FROM vaccinations
 	WHERE location = 'Singapore'
@@ -137,6 +136,12 @@ LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D40_avail_vaccine
 #######		generate the daily new cases after 21 days, 60 days, and 120 days. ###########################################
 ##############################################################################################################################
 
+# sum of total vaccinations is the sum of all vaccines(accumulating all types: Pfizer/BioNTech, Oxford/AstraZeneca, Moderna, Johnson&Johnson)
+# on each in day in Germany,
+# Taking 2020-12-27 for example, 
+# daily_new_cases_after21days is the daily new cases in Germany 21 days later, which should tally with new cases on 2021-01-17
+# daily_new_cases_after60days is the daily new cases in Germany 60 days later, which should tally with new cases on 2021-02-25
+# daily_new_cases_after120day is the daily new cases in Germany 120 days later, which should tally with new cases on 2021-04-26
 
 CREATE VIEW q10 AS
 SELECT date , sum(total_vaccinations) AS total
