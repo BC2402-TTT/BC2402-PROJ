@@ -130,13 +130,11 @@ GROUP BY date, vaccine;
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, ######################################################################################################
 ############display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. ###############################################################################
 ##########################################################################################################################################################################################
-#For vaccinations drivers, we want to find out what drivers vaccination
-#Specific to Germany, we find out the number of new cases each day, 
-#then for each different type of vaccine we wanted to find the total
-#number of vaccines administered 20 days later, 30 days later and 40 days later,
-#This is represented by D20_vaccine, D30_vaccine, D40_vaccine.
-
-
+# For vaccinations drivers, we want to find out what drivers vaccination
+# Specific to Germany, we find out the number of new cases each day, 
+# then for each different type of vaccine we wanted to find the total
+# number of vaccines administered 20 days later, 30 days later and 40 days later,
+# This is represented by D20_vaccine, D30_vaccine, D40_vaccine.
 SELECT DISTINCT c.date, c.new_cases, c.vaccine,
 d20.D20_avail_vaccine AS D20_vaccine, 
 d30.D30_avail_vaccine AS D30_vaccine
