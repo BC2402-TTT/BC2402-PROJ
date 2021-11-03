@@ -24,9 +24,6 @@ WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanm
 #########################################################################
 ####### 3.	Generate a list of unique data sources (source_name). #######
 #########################################################################
-SELECT DISTINCT(source_name) as unique_data_sources
-FROM sources
-ORDER BY unique_data_sources;
 # Using the source_name column as instructed in the question, we obtain 91 rows.
 # However, this may not be correct method if we want to generate the list of UNIQUE data sources,
 # because multiple countries list "Ministry of Health" as their source_name,
@@ -37,6 +34,9 @@ ORDER BY unique_data_sources;
 ##	FROM sources
 ##	ORDER BY unique_data_sources;	
 # We get 147 rows instead of 91.
+SELECT DISTINCT(source_name) as unique_data_sources
+FROM sources
+ORDER BY unique_data_sources;
 
 
 ###############################################################################

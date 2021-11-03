@@ -106,78 +106,67 @@ db.country_vac_with_covid19data.aggregate([
     {$sort: {global_total: -1}}
 ])
 
-
-
-//Qn 11
-//db.gp1.aggregate([
-//    {$match:{continent:"Asia"}},
-//    {$group:{_id:{continent:"$continent"}, totalPopulation:{$sum:"$population"}}}])
-    
+/* 11. What is the total population in Asia? */
 db.country_vac_with_covid19data.aggregate([
-    {$match:{continent:"Asia"}},
-    {$group:{_id:{country:"$location"}, population:{$avg:"$population_cleaned"}}},
-    {$group:{_id:null, totalPopulation:{$sum:"$population"}}}
-    ])
-    
+    {$match: {continent: "Asia"}},
+    {$group: {_id: {country: "$location"}, population: {$avg: "$population_cleaned"}}},
+    {$group: {_id: null, total_population: {$sum: "$population"}}},
+    {$project: {_id: 0, "total_population": "$total_population"}}
+])
 
-db.country_vac_with_covid19data.aggregate([
-    {$match:{continent:"Asia"}},
-    {$project:{population_cleaned:1, location:1}}
-    {$group:{_id:{country:"$location"}, population:{$first:"$population_cleaned"}}}
-    {$group:{_id:null, totalPopulation:{$sum:"$population"}}}
-    ])
-    
-    
-//Qn12
-    
+/* 12. What is the total population among the ten ASEAN countries? */
 db.country_vac_with_covid19data.aggregate([
     {$match: {location: {$in: ["Brunei", "Cambodia", "Indonesia", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Vietnam"]}}},
-    {$group: {_id:{location:"$location"}, population:{$max:"$population_cleaned"}}},
-    {$group: {_id:null, totalPopulation:{$sum:"$population"}}}
-    ])
+    {$group: {_id: {location: "$location"}, population: {$max: "$population_cleaned"}}},
+    {$group: {_id: null, total_population: {$sum: "$population"}}},
+    {$project: {_id: 0, "total_population": "$total_population"}}
+])
 
-//Qn13
-db.country_vac_clean.aggregate([
-    {$group: {_id:null, Unique_data_sources: {$addToSet: "$source_name"}}}])
+/* 13. Generate a list of unique data sources (source_name). */
+db.country_vaccinations_cleaned.aggregate([
+    {$group: {_id:null, unique_data_sources: {$addToSet: "$source_name"}}},
+    {$project: {_id: 0, "unique_data_sources": "$unique_data_sources"}}
+])
 
-//Qn14
-db.country_vac_clean.aggregate([
-    {$match: { $and: [ {country: "Singapore"}, {date: {$gte:ISODate("2021-03-01"),$lt:ISODate("2021-04-01")}}]}},
-    {$project: {_id:0,date:1, daily_vaccinations:1}},
-    {$sort: {"date":1}}
+/* 14. Specific to Singapore, display the daily total_vaccinations starting (inclusive) March-1 2021 through (inclusive) May-31 2021. */
+db.country_vaccinations_cleaned.aggregate([
+    {$match: { $and: [ {country: "Singapore"}, {date_cleaned: {$gte: ISODate("2021-03-01"), $lt: ISODate("2021-04-01")}}]}},
+    {$project: {_id:0, date_cleaned: 1, daily_vaccinations: 1}},
+    {$sort: {"date_cleaned": 1}}
+])
     
-//Qn15
-db.country_vac_clean.aggregate([
-    {$match: { $and: [ {country: "Singapore"}, {daily_vaccinations: {$gt: 0}}]}},
-    {$project: {date:1}},
-    {$limit:1}])
+/* 15. When is the first batch of vaccinations recorded in Singapore? */
+db.country_vaccinations_cleaned.aggregate([
+    {$match: {$and: [{country: "Singapore"}, {daily_vaccinations_cleaned: {$gt: 0}}]}},
+    {$project: {date_cleaned: 1}},
+    {$limit: 1},
+    {$project: {_id: 0, "first_batch_of_vaccinations":"$date_cleaned"}}
+])
     
-//Qn16    01-11 or 01-12
-db.gp1.aggregate([
+/* 16. Based on the date identified in (5), specific to Singapore, compute the total number of new cases thereafter.
+For instance, if the date identified in (5) is Jan-1 2021, the total number of new cases will be the sum of new cases starting from (inclusive) Jan-1 to the last date in the dataset. */
+db.country_vac_with_covid19data.aggregate([
     {$match: {location: "Singapore"}},
-    {$unwind: "$data"},
-    {$match: {"data.date_cleaned": {$gte: ISODate("2021-01-12")}}}
-    {$group: {_id:null, total_new_cases:{$sum:"$data.new_cases"}}}
-    ])
+    {$match: {"date_cleaned": {$gte: ISODate("2021-01-12")}}},
+    {$group: {_id: null, new_cases_thereafter: {$sum: "$new_cases_cleaned"}}},
+    {$project: {_id: 0, "new_cases_thereafter": "$new_cases_thereafter"}}
+])
 
-db.gp2.aggregate([
-    {$match: {location:"Singapore"}},
-    {$match: {"date_cleaned":  {$gte: ISODate("2021-01-12")}}}
-    {$group: {_id:null, total_new_cleaned:{$sum:"$new_cases_cleaned"}}}
-    ])
-//Qn17
-db.gp2.aggregate([
+/* 17. Compute the total number of new cases in Singapore before the date identified in (5).
+For instance, if the date identified in (5) is Jan-1 2021 and the first date recorded (in Singapore) in the dataset is Feb-1 2020, the total number of new cases will be the sum of new cases starting from (inclusive) Feb-1 2020 through (inclusive) Dec-31 2020. */
+db.country_vac_with_covid19data.aggregate([
     {$match: {location: "Singapore"}},
-    {$match: {"date_cleaned": {$lt: ISODate("2021-01-12")}}}
-    {$group: {_id:null, total_new_cases:{$sum:"$new_cases_cleaned"}}}
-    ])
+    {$match: {"date_cleaned": {$lt: ISODate("2021-01-12")}}},
+    {$group: {_id: null, new_cases_before_date: {$sum: "$new_cases_cleaned"}}},
+    {$project: {_id: 0, "new_cases_before_date": "$new_cases_before_date"}}
+])
 
-//Qn18
-db.gp2.aggregate([
-    {$match:{location:"Germany"}},
-    {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne:[]}}}
+/* 18. Herd immunity estimation. On a daily basis, specific to Germany, calculate the percentage of new cases and total vaccinations on each available vaccine in relation to its population. */
+db.country_vac_with_covid19data.aggregate([
+    {$match: {location: "Germany"}},
+    {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne: []}}},
     {$unwind: "$vaccinations_by_manufacturer_data"},
-    {$project:{ date:"$date", percentageOfNewCases:{$multiply:[ {$divide: ["$new_cases_cleaned", "$population_cleaned"]}, 100]},
-    vaccine: "$vaccinations_by_manufacturer_data.vaccine", totalVaccinations: "$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}}
-    ])
-
+    {$project: {date: "$date_cleaned", "percentage_of_new_cases_(in %)": {$multiply: [{$divide: ["$new_cases_cleaned", "$population_cleaned"]}, 100]}, vaccine: "$vaccinations_by_manufacturer_data.vaccine", "percentage_of_total_vaccinations_(in %)": {$multiply: [{$divide: ["$vaccinations_by_manufacturer_data.total_vaccinations_cleaned", "$population_cleaned"]}, 100]}}},
+    {$project: {_id: 0, date: 1, "percentage_of_new_cases_(in %)": 1, vaccine: 1, "percentage_of_total_vaccinations_(in %)": 1}},
+    {$sort: {date: 1, vaccine: -1}}
+])
