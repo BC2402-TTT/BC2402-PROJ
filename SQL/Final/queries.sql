@@ -1,12 +1,12 @@
 #########################################################
 ####### 1.	What is the total population in Asia? #######
 #########################################################
-SELECT sum(population) as total_population_in_asia
-FROM (SELECT population 
-	  FROM locations 
-      WHERE continent = 'Asia'
-      GROUP BY location) AS subquery;
-      
+# The normalised "locations" table contains the population count for each country
+SELECT SUM(population)
+FROM locations
+GROUP BY continent
+HAVING continent = 'Asia';
+
 
 ###############################################################################
 ####### 2.	What is the total population among the ten ASEAN countries? #######
