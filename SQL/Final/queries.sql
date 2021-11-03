@@ -125,7 +125,7 @@ WHERE location = 'Germany'
 GROUP BY date, vaccine;
 
 
-<<<<<<< Updated upstream
+
 ##########################################################################################################################################################################################
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, ######################################################################################################
 ############display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. ###############################################################################
@@ -158,7 +158,8 @@ LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D40_avail_vaccine
 FROM country_vaccinations_by_manufacturer_sem6_grp2 
 WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
 
-=======
+
+
 #######################################################################################################
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, display the #######
 ## total vaccinations of each available vaccines after 20 days, 30 days, and 40 days.                ##
