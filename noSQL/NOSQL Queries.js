@@ -37,28 +37,32 @@ db.country_vaccinations_by_manufacturer.aggregate(
 
 /* 5.	Italy has commenced administrating various vaccines to its populations as a vaccine becomes available. Identify the first dates of each vaccine being administrated, then compute the difference in days between the earliest date and the 4th date.
 [source table: country_vaccinations_by_manufacturer] */
-db.country_vaccinations_by_manufacturer.aggregate(
-    {$match:{location: "Italy" } }, 
-    {$group:{_id:"$vaccine", date:{$min:"$date_cleaned"} } },
-    {$sort: {"date_cleaned" : 1 } },
-    {$project: {"vaccine" : 1, "date" : 1} }
-)
+db.country_vac_with_covid19data.aggregate(
+    {$match:{location: "Italy" }}, 
+    {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne:[]}}},
+    {$unwind:"$vaccinations_by_manufacturer_data"},
+    {$group:{_id:"$vaccinations_by_manufacturer_data.vaccine", date:{$min:"$date_cleaned"}}},
+    {$group:{_id:null, date:{ $addToSet: "$date"}}}
+    {$project: { date_diff:{$dateDiff:{
+                        startDate: {$min:"$date"},
+                        endDate:{$max:"$date"},
+                        unit:"day"}}}}
 
 /* 6.	What is the country with the most types of administrated vaccine?
 [source table: country_vaccinations_by_manufacturer] */
-db.country_vaccinations_by_manufacturer.aggregate([
-    {$group:{_id:{location:"$location",vaccine:"$vaccine"}}},
-    {$group:{_id:{location:"$_id.location"},all_vaccine:{$push:"$_id.vaccine"},count:{$sum:1}}},
+db.country_vac_with_covid19data.aggregate([
+    {$group:{_id:{location:"$location",vaccine:"$vaccinations_by_manufacturer_data.vaccine"}}},
+    {$project:{_id:0,location:"$_id.location",all_vaccine:"$_id.vaccine",count:{$size:"$_id.vaccine"}}},
     {$sort:{count:-1}},
     {$limit:1},
     {$unwind: "$all_vaccine"},
-    {$project:{_id:0,"location":"$_id.location","vaccine":"$all_vaccine"}}
-])
+    {$project:{_id:0,"location":"$location","vaccine":"$all_vaccine"}}
+    ])  
     
 /* 7.   What are the countries that have fully vaccinated more than 60% of its people? For each
 country, display the vaccines administrated.
 [source table: country_vaccinations] */
-db.country_vaccinations.aggregate([
+db.country_vaccinations_cleaned.aggregate([
     {$group:{_id:{country:"$country"}, vaccines:{$max:"$vaccines"}, vaccination_percentage:{$max:"$people_fully_vaccinated_per_hundred_cleaned"}}},
     {$match:{"vaccination_percentage":{$gt:60}}},
     {$project:{_id:0, "country":"$_id.country", vaccines:1, vaccination_percentage:1}},
@@ -68,11 +72,15 @@ db.country_vaccinations.aggregate([
 /* 8. Monthly vaccination insight – display the monthly total vaccination amount of each
 vaccine per month in the United States.
 [source table: country_vaccinations_by_manufacturer]*/
-db.country_vaccinations_by_manufacturer.aggregate([
+db.country_vac_with_covid19data.aggregate([
     {$match:{location:"United States"}},
-    {$project:{_id:0, month:{$month:"$date_cleaned"}, vaccine:1, total_vaccinations_cleaned:1}},
-    {$group:{_id:{month:"$month",vaccine:"$vaccine"}, monthly_total_vaccination:{$max:"$total_vaccinations_cleaned"}}}
-])
+    {$match:{"vaccinations_by_manufacturer_data":{$exists:true,$ne:[]}}},
+    {$unwind:"$vaccinations_by_manufacturer_data"},
+    {$project:{_id:0, month:{$month:"$date_cleaned"},"vaccine":"$vaccinations_by_manufacturer_data.vaccine","total_vaccinations_cleaned":"$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}}, 
+    {$group:{_id:{month:"$month",vaccine:"$vaccine"}, monthly_total_vaccination:{$max:"$total_vaccinations_cleaned"}}},
+    {$project:{_id:0,"month":"$_id.month","vaccine":"$_id.vaccine",monthly_total_vaccination:1},
+    {$sort:{month:1}}
+    ])
 // IDK how to change month to month name
 
 /* 9. Days to 50 percent. Compute the number of days (i.e., using the first available date on
@@ -97,8 +105,10 @@ db.country_vaccinations.aggregate([
 
 /* 10. Compute the global total of vaccinations per vaccine.
 [source table: country_vaccinations_by_manufacturer]*/
-db.country_vaccinations_by_manufacturer.aggregate([
-    {$group:{_id:{location:"$location",vaccine:"$vaccine"}, total_vaccination:{$max:"$total_vaccinations_cleaned"}}},
+db.country_vac_with_covid19data.aggregate([
+    {$match:{"vaccinations_by_manufacturer_data":{$exists:true,$ne:[]}}},
+    {$unwind:"$vaccinations_by_manufacturer_data"},
+    {$group:{_id:{location:"$location",vaccine:"$vaccinations_by_manufacturer_data.vaccine"}, total_vaccination:{$max:"$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}}},
     {$group:{_id:{vaccine:"$_id.vaccine"}, global_total:{$sum:"$total_vaccination"}}},
     {$project:{_id:0, vaccine:"$_id.vaccine", global_total:"$global_total"}},
     {$sort:{global_total:-1}}
@@ -113,14 +123,14 @@ db.country_vaccinations_by_manufacturer.aggregate([
 //    {$match:{continent:"Asia"}},
 //    {$group:{_id:{continent:"$continent"}, totalPopulation:{$sum:"$population"}}}])
     
-db.gp2.aggregate([
+db.country_vac_with_covid19data.aggregate([
     {$match:{continent:"Asia"}},
     {$group:{_id:{country:"$location"}, population:{$avg:"$population_cleaned"}}},
     {$group:{_id:null, totalPopulation:{$sum:"$population"}}}
     ])
     
 
-db.gp2.aggregate([
+db.country_vac_with_covid19data.aggregate([
     {$match:{continent:"Asia"}},
     {$project:{population_cleaned:1, location:1}}
     {$group:{_id:{country:"$location"}, population:{$first:"$population_cleaned"}}}
@@ -130,7 +140,7 @@ db.gp2.aggregate([
     
 //Qn12
     
-db.gp2.aggregate([
+db.country_vac_with_covid19data.aggregate([
     {$match: {location: {$in: ["Brunei", "Cambodia", "Indonesia", "Laos", "Malaysia", "Myanmar", "Philippines", "Singapore", "Thailand", "Vietnam"]}}},
     {$group: {_id:{location:"$location"}, population:{$max:"$population_cleaned"}}},
     {$group: {_id:null, totalPopulation:{$sum:"$population"}}}
