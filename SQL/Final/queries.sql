@@ -126,10 +126,10 @@ GROUP BY date, vaccine;
 
 
 
-##########################################################################################################################################################################################
-####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, ######################################################################################################
-############display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. ###############################################################################
-##########################################################################################################################################################################################
+#######################################################################################################
+####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, display the #######
+## total vaccinations of each available vaccines after 20 days, 30 days, and 40 days.                ##
+#######################################################################################################
 # For vaccinations drivers, we want to find out what drivers vaccination
 # Specific to Germany, we find out the number of new cases each day, 
 # then for each different type of vaccine we wanted to find the total
@@ -186,7 +186,7 @@ LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D30_avail_vaccine
 LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D40_avail_vaccine 
 			FROM country_vaccinations_by_manufacturer_sem6_grp2 
             WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
->>>>>>> Stashed changes
+
 
 
 ##############################################################################################################################
