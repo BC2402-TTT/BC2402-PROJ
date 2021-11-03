@@ -22,15 +22,15 @@ db.country_vaccinations.aggregate(
 /* 3.	Identify the maximum daily vaccinations per million of each country. Sort the list based on daily vaccinations per million in a descending order.
 [source table: country_vaccinations] */
 db.country_vaccinations.aggregate(
-    {$group: {_id:"$country", max_daily_vaccinations_per_million: {$max: "$daily_vaccinations_per_million_cleaned"} } }
-    {$sort: {"max_daily_vaccinations_per_million_cleaned":-1}},
+    {$group: {_id:"$country", max_daily_vaccinations_per_million: {$max: "$daily_vaccinations_per_million_cleaned"} } },
+    {$sort: {"max_daily_vaccinations_per_million":-1}},
     {$project: {"country": 1, "max_daily_vaccinations_per_million":1}}
 )
 
 /* 4.	Which is the most administrated vaccine? Display a list of total administration (i.e., sum of total vaccinations) per vaccine.
 [source table: country_vaccinations_by_manufacturer] */
 db.country_vaccinations_by_manufacturer.aggregate(
-    {$group: {_id:"$vaccine", total_administrated: {$sum: "$total_vaccinations_cleaned"} } }
+    {$group: {_id:"$vaccine", total_administrated: {$sum: "$total_vaccinations_cleaned"} } },
     {$sort: {"total_administrated":-1}},
     {$project: {"vaccine": 1, "total_administrated":1}}
 )
