@@ -40,7 +40,7 @@ db.country_vaccinations_by_manufacturer.aggregate(
 db.country_vaccinations_by_manufacturer.aggregate(
     {$match:{location: "Italy" } }, 
     {$group:{_id:"$vaccine", date:{$min:"$date_cleaned"} } },
-    {$sort: {"date_cleaned" : 1 } }
+    {$sort: {"date_cleaned" : 1 } },
     {$project: {"vaccine" : 1, "date" : 1} }
 )
 
@@ -53,7 +53,7 @@ db.country_vaccinations_by_manufacturer.aggregate([
     {$limit:1},
     {$unwind: "$all_vaccine"},
     {$project:{_id:0,"location":"$_id.location","vaccine":"$all_vaccine"}}
-    ])
+])
     
 /* 7.   What are the countries that have fully vaccinated more than 60% of its people? For each
 country, display the vaccines administrated.
@@ -62,17 +62,8 @@ db.country_vaccinations.aggregate([
     {$group:{_id:{country:"$country"}, vaccines:{$max:"$vaccines"}, vaccination_percentage:{$max:"$people_fully_vaccinated_per_hundred_cleaned"}}},
     {$match:{"vaccination_percentage":{$gt:60}}},
     {$project:{_id:0, "country":"$_id.country", vaccines:1, vaccination_percentage:1}},
-    
+    {$sort:{vaccination_percentage:-1}}
 ])
-
-db.country_vac_with_covid19data.aggregate([
-    {$group:{_id:{location:"$location",vaccine:"$vaccinations_by_manufacturer_data.vaccine"}}},
-    {$project:{_id:0,location:"$_id.location",all_vaccine:"$_id.vaccine",count:{$size:"$_id.vaccine"}}},
-    {$sort:{count:-1}},
-    {$limit:1},
-    {$unwind: "$all_vaccine"},
-    {$project:{_id:0,"location":"$location","vaccine":"$all_vaccine"}}
-    ])
 
 /* 8. Monthly vaccination insight – display the monthly total vaccination amount of each
 vaccine per month in the United States.
@@ -81,7 +72,7 @@ db.country_vaccinations_by_manufacturer.aggregate([
     {$match:{location:"United States"}},
     {$project:{_id:0, month:{$month:"$date_cleaned"}, vaccine:1, total_vaccinations_cleaned:1}},
     {$group:{_id:{month:"$month",vaccine:"$vaccine"}, monthly_total_vaccination:{$max:"$total_vaccinations_cleaned"}}}
-    ])
+])
 // IDK how to change month to month name
 
 /* 9. Days to 50 percent. Compute the number of days (i.e., using the first available date on
