@@ -170,3 +170,7 @@ db.country_vac_with_covid19data.aggregate([
     {$project: {_id: 0, date: 1, "percentage_of_new_cases_(in %)": 1, vaccine: 1, "percentage_of_total_vaccinations_(in %)": 1}},
     {$sort: {date: 1, vaccine: -1}}
 ])
+
+/* 19. Vaccination Drivers. Specific to Germany, based on each daily new case, display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. */
+
+/* 20. Vaccination Effects. Specific to Germany, on a daily basis, based on the total number of accumulated vaccinations (sum of total_vaccinations of each vaccine in a day), generate the daily new cases after 21 days, 60 days, and 120 days. */
