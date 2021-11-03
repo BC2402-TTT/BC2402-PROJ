@@ -105,9 +105,9 @@ GROUP BY date, vaccine;
 ############display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. ###############################################################################
 ##########################################################################################################################################################################################
 SELECT DISTINCT c.date, c.new_cases, c.vaccine,
-d20.D20_avail_vaccine-c.total_vaccinations AS D20_vaccine, 
-d30.D30_avail_vaccine-c.total_vaccinations AS D30_vaccine
-, d40.D40_avail_vaccine-c.total_vaccinations AS D40_vaccine
+d20.D20_avail_vaccine AS D20_vaccine, 
+d30.D30_avail_vaccine AS D30_vaccine
+, d40.D40_avail_vaccine AS D40_vaccine
 FROM
 (SELECT DISTINCT cd.date, 
 cd.new_cases, cm.vaccine, cm.total_vaccinations, 
@@ -115,7 +115,7 @@ date_add(cd.date, INTERVAL 20 DAY) AS DAY20,
 date_add(cd.date, INTERVAL 30 DAY) AS DAY30, 
 date_add(cd.date, INTERVAL 40 DAY) AS DAY40
 FROM cases cd
-JOIN country_vaccinations_28oct.country_vaccinations_by_manufacturer_sem6_grp2 cm ON cm.date = cd.date
+JOIN country_vaccinations_28oct.country_vaccinations_by_manufacturer_sem6_grp2 cm ON cm.date = cd.date and cm.location = cd.location
 WHERE cd.location = 'Germany'
 ) c
 LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D20_avail_vaccine 
