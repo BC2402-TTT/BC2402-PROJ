@@ -2,7 +2,9 @@
 ####### 1.	What is the total population in Asia? #######
 #########################################################
 # The normalised "locations" table contains the population count for each country.
-# We then sum the populations of rows with "Asia" as continent
+# We group the table by continents, then filter the table to only rows where the continent is 'Asia',
+# this returns a table of all the Asian countries.
+# Then we apply an aggregate SUM() function on the population column to obtain a single value response.
 SELECT SUM(population)
 FROM locations
 GROUP BY continent
@@ -22,9 +24,8 @@ WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanm
 #########################################################################
 ####### 3.	Generate a list of unique data sources (source_name). #######
 #########################################################################
-SELECT DISTINCT source_name 
-FROM sources 
-ORDER BY source_name;
+SELECT * 
+FROM sources;
 
 
 ##################################################################################################################################################
