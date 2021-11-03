@@ -4,8 +4,9 @@ use country_vaccinations
 //cleaning the country_vaccinations dataset, convert from string to double or string to date when necessary
 
 //convert date from string to Date datatype
-db.country_vaccinations.find({date: {$exists: true}}).forEach(function(obj) { 
-    obj.date_cleaned = new Date(obj.date);
+db.country_vaccinations.find({date: {$exists: true}}).forEach(function(obj) {
+    var fields = obj.date.split("/");
+    obj.date_cleaned = new Date(fields[2] + "-" + ("0" + fields[0]).slice (-2) + "-" + ("0" + fields[1]).slice (-2));
     db.country_vaccinations.save(obj);
 });
 
