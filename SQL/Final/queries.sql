@@ -134,7 +134,7 @@ LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D40_avail_vaccine
 #######		generate the daily new cases after 21 days, 60 days, and 120 days. ###########################################
 ##############################################################################################################################
 
-# sum of total vaccinations is the sum of all vaccines(including all types: Pfizer/BioNTech, Oxford/AstraZeneca, Moderna, Johnson&Johnson)
+# sum of total vaccinations is the sum of all vaccines(accumulating all types: Pfizer/BioNTech, Oxford/AstraZeneca, Moderna, Johnson&Johnson)
 # on each in day in Germany,
 # Taking 2020-12-27 for example, 
 # daily_new_cases_after21days is the daily new cases in Germany 21 days later, which should tally with new cases on 2021-01-17
