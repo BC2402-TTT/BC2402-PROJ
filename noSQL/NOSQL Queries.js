@@ -5,8 +5,8 @@ use country_vaccinations
 [source table: country_vaccinations] */
 db.country_vaccinations.find(
     {country: "Singapore"},
-    {date:1, _id:0,total_vaccinations_cleaned:1}
-)
+    {date_cleaned:1, _id:0,total_vaccinations_cleaned:1}
+).sort({date_cleaned: 1})
 
 
 /* 2.	Display the sum of daily vaccinations among ASEAN countries.
