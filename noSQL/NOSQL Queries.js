@@ -65,6 +65,15 @@ db.country_vaccinations.aggregate([
     
 ])
 
+db.country_vac_with_covid19data.aggregate([
+    {$group:{_id:{location:"$location",vaccine:"$vaccinations_by_manufacturer_data.vaccine"}}},
+    {$project:{_id:0,location:"$_id.location",all_vaccine:"$_id.vaccine",count:{$size:"$_id.vaccine"}}},
+    {$sort:{count:-1}},
+    {$limit:1},
+    {$unwind: "$all_vaccine"},
+    {$project:{_id:0,"location":"$location","vaccine":"$all_vaccine"}}
+    ])
+
 /* 8. Monthly vaccination insight – display the monthly total vaccination amount of each
 vaccine per month in the United States.
 [source table: country_vaccinations_by_manufacturer]*/
