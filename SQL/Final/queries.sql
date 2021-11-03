@@ -29,6 +29,7 @@ ORDER BY source_name;
 ####### 4.	Specific to Singapore, display the daily total_vaccinations starting (inclusive) March-1 2021 through (inclusive) May-31 2021. #######
 ##################################################################################################################################################
 # We used daily vaccinations instead of raw daily vaccinations as it is cleaned and validated, so it is likely to be more accurate.
+# From now onwards, we will use daily_vaccinations.
 SELECT date, daily_vaccinations AS daily_total_vaccinations 
 FROM vaccinations 
 WHERE location = 'Singapore' AND date BETWEEN '2021-03-01' AND '2021-05-31';
@@ -46,7 +47,7 @@ WHERE location = 'Singapore' AND date BETWEEN '2021-03-01' AND '2021-05-31';
 # Therefore, the numbers for 1/12/2021 makes sense, since
 # 6200 = 3400 + 2800
 # We cannot do the same confirmation for 1/11/2021, since there is missing data for 1/10/2021 and earlier
-# Hence, 1/12/2021's data is more reliable.
+# Hence, data in 1/12/2021 is more reliable.
 SELECT MIN(date) as Q5Answer
 FROM vaccinations 
 WHERE location = 'Singapore'
@@ -69,10 +70,16 @@ AND date >=
 	AND daily_vaccinations > 0
 );
 
-
-
-
-
+####################################################################################################################################################################################################################################################################
+####### 8.	Herd immunity estimation. On a daily basis, specific to Germany, calculate the percentage of new cases (i.e., percentage of new cases = new cases / populations) and total vaccinations on each available vaccine in relation to its population. #######
+####################################################################################################################################################################################################################################################################
+SELECT cases.date, new_cases / population AS percentage_of_new_cases, vaccine, daily_vaccinations / population AS daily_vaccinations_against_population, daily_vaccinations
+FROM cases 
+INNER JOIN vaccinations ON cases.location = vaccinations.location AND cases.date = vaccinations.date
+INNER JOIN country_vaccinations_by_manufacturer_sem6_grp2 on vaccinations.location = country_vaccinations_by_manufacturer_sem6_grp2.location AND vaccinations.date = country_vaccinations_by_manufacturer_sem6_grp2.date
+INNER JOIN locations ON cases.location = locations.location
+WHERE cases.location = 'Germany' 
+ORDER BY cases.date;
 
 ##########################################################################################################################################################################################
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, ######################################################################################################
