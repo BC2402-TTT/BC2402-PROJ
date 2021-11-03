@@ -84,16 +84,15 @@ db.country_vaccinations_cleaned.aggregate([
 /* 8. Monthly vaccination insight – display the monthly total vaccination amount of each
 vaccine per month in the United States.
 [source table: country_vaccinations_by_manufacturer]*/
-db.country_vac_with_covid19data.aggregate([
+db.country_vac_with_covid19_data.aggregate([
     {$match:{location:"United States"}},
     {$match:{"vaccinations_by_manufacturer_data":{$exists:true,$ne:[]}}},
     {$unwind:"$vaccinations_by_manufacturer_data"},
-    {$project:{_id:0, month:{$month:"$date_cleaned"},"vaccine":"$vaccinations_by_manufacturer_data.vaccine","total_vaccinations_cleaned":"$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}}, 
+    {$project:{_id:0, month:{$month:"$date_cleaned"},"vaccine":"$vaccinations_by_manufacturer_data.vaccine","total_vaccinations_cleaned":"$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}},
     {$group:{_id:{month:"$month",vaccine:"$vaccine"}, monthly_total_vaccination:{$max:"$total_vaccinations_cleaned"}}},
-    {$project:{_id:0,"month":"$_id.month","vaccine":"$_id.vaccine",monthly_total_vaccination:1},
+    {$project:{_id:0,"month":"$_id.month","vaccine":"$_id.vaccine",monthly_total_vaccination:1}},
     {$sort:{month:1}}
-    ])
-// IDK how to change month to month name
+])
 
 /* 9. Days to 50 percent. Compute the number of days (i.e., using the first available date on
 records of a country) that each country takes to go above the 50% threshold of
