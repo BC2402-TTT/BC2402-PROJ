@@ -82,7 +82,7 @@ AND date >=
 #########################################################################################################
 SELECT SUM(new_cases) AS new_cases
 FROM cases
-WHERE location = 'Singapore' AND DATE <= (
+WHERE location = 'Singapore' AND DATE < (
 	SELECT MIN(date)
 	FROM vaccinations
 	WHERE location = 'Singapore'
