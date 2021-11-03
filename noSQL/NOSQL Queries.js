@@ -79,6 +79,19 @@ db.country_vaccinations_by_manufacturer.aggregate([
 records of a country) that each country takes to go above the 50% threshold of
 vaccination administration (i.e., total_vaccinations_per_hundred > 50)
 [source table: country_vaccinations] */
+db.country_vaccinations.aggregate([
+    {$project: {country: 1, date_cleaned: 1, total_vaccinations_per_hundred_cleaned: 1}},
+    {$group: {_id: "$country", minDate: {$min: "$date_cleaned"}, date50: {$min: {$cond: [{$gt: ["$total_vaccinations_per_hundred_cleaned", 50]}, "$date_cleaned", null]}}}},
+    {$match: {$and: [{date50: {$ne: null}}, {date50: {$exists: true}}]}},
+    {$project: {date_diff: {
+        $dateDiff: {
+            startDate: "$minDate",
+            endDate: "$date50",
+            unit: "day"
+        }
+    }}},
+    {$sort: {date_diff: -1}}
+])
 
 
 
@@ -89,30 +102,6 @@ db.country_vaccinations_by_manufacturer.aggregate([
     {$group:{_id:{vaccine:"$_id.vaccine"}, global_total:{$sum:"$total_vaccination"}}},
     {$project:{_id:0, vaccine:"$_id.vaccine", global_total:"$global_total"}},
     {$sort:{global_total:-1}}
-    ])
-
-
-
-
-
-
-
-
-
-
-//Qn9
-db.country_vac_clean.aggregate([
-    {$project: {country: 1, date: 1, total_vaccinations_per_hundred: 1}},
-    {$group: {_id: "$country", minDate: {$min: "$date"}, date50: {$min: {$cond: [{$gt: ["$total_vaccinations_per_hundred", 50]}, "$date", null]}}}},
-    {$match: {$and: [{date50: {$ne: null}}, {date50: {$exists: true}}]}},
-    {$project: {date_diff: {
-        $dateDiff: {
-            startDate: "$minDate",
-            endDate: "$date50",
-            unit: "day"
-        }
-    }}},
-    {$sort: {date_diff: -1}}
 ])
 
 
