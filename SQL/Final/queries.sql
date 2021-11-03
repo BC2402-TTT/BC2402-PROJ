@@ -18,24 +18,37 @@ HAVING continent = 'Asia';
 # We then sum the populations of rows that are in ASEAN.
 SELECT SUM(population)
 FROM locations
-WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam')
+WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam');
 
 
 #########################################################################
 ####### 3.	Generate a list of unique data sources (source_name). #######
 #########################################################################
-SELECT * 
-FROM sources;
+SELECT DISTINCT(source_name) as unique_data_sources
+FROM sources
+ORDER BY unique_data_sources;
+# Using the source_name column as instructed in the question, we obtain 91 rows.
+# However, this may not be correct method if we want to generate the list of UNIQUE data sources,
+# because multiple countries list "Ministry of Health" as their source_name,
+# but these Ministry of Health(s) are for their respective countries and should hence be considered different data sources.
+# Examples of countries with MOH: Argentina, Austria, Uganda, Zimbabwe, ...
+# By selecting source_website as opposed to source_name, i.e.
+##	SELECT DISTINCT(source_name) as unique_data_sources
+##	FROM sources
+##	ORDER BY unique_data_sources;	
+# We get 147 rows instead of 91.
 
 
-##################################################################################################################################################
-####### 4.	Specific to Singapore, display the daily total_vaccinations starting (inclusive) March-1 2021 through (inclusive) May-31 2021. #######
-##################################################################################################################################################
+###############################################################################
+####### 4.	Specific to Singapore, display the daily total_vaccinations #######
+##  starting (inclusive) March-1 2021 through (inclusive) May-31 2021.       ##
+###############################################################################
 # We used daily vaccinations instead of raw daily vaccinations as it is cleaned and validated, so it is likely to be more accurate.
 # From now onwards, we will use daily_vaccinations.
 SELECT date, daily_vaccinations AS daily_total_vaccinations 
 FROM vaccinations 
-WHERE location = 'Singapore' AND date BETWEEN '2021-03-01' AND '2021-05-31';
+WHERE location = 'Singapore' AND date BETWEEN '2021-03-01' AND '2021-05-31'
+ORDER BY date;
 
 
 ##################################################################################
@@ -52,7 +65,7 @@ WHERE location = 'Singapore' AND date BETWEEN '2021-03-01' AND '2021-05-31';
 # 6200 = 3400 + 2800
 # We cannot do the same confirmation for 1/11/2021, since there is missing data for 1/10/2021 and earlier
 # Hence, data in 1/12/2021 is more reliable.
-SELECT MIN(date) as Q5Answer
+SELECT MIN(date) as first_batch_of_vaccinations
 FROM vaccinations 
 WHERE location = 'Singapore'
 AND daily_vaccinations > 0;
@@ -60,11 +73,13 @@ AND daily_vaccinations > 0;
 
 #################################################################################################################################
 ####### 6.	Based on the date identified in (5), specific to Singapore, compute the total number of new cases thereafter. #######
-# For instance, if the date identified in (5) is Jan-1 2021, the total number of new cases will be the sum of new cases 
-# starting from (inclusive) Jan-1 to the last date in the dataset.
+## For instance, if the date identified in (5) is Jan-1 2021, the total number of new cases will be the sum of new cases       ##
+## starting from (inclusive) Jan-1 to the last date in the dataset. 														   ##
 ################################################################################################################################# 
-# total_cases:		total confirmed cases of COVID-19
-SELECT SUM(new_cases) as Q6Answer
+# new_cases:		new confirmed cases of COVID-19
+# Since we want the latest date in the dataset, we only need to set the lower bound of date and not upper bound
+# Note: this lower bound is inclusive.
+SELECT SUM(new_cases) as total_cases_thereafter
 FROM cases
 WHERE location = 'Singapore'
 AND date >= 
@@ -77,29 +92,40 @@ AND date >=
 
 #########################################################################################################
 ####### 7.	Compute the total number of new cases in Singapore before the date identified in (5). #######
-# For instance, if the date identified in (5) is Jan-1 2021 and the first date recorded (in Singapore) 
-# in the dataset is Feb-1 2020, the total number of new cases will be the sum of new cases starting 
-# from (inclusive) Feb-1 2020 through (inclusive) Dec-31 2020.
+## For instance, if the date identified in (5) is Jan-1 2021 and the first date recorded (in Singapore)##
+## in the dataset is Feb-1 2020, the total number of new cases will be the sum of new cases starting   ##
+## from (inclusive) Feb-1 2020 through (inclusive) Dec-31 2020.                                        ##
 #########################################################################################################
-SELECT SUM(new_cases) AS new_cases
+# Since we want the earliest date in the dataset, we only need to set the upper bound of date and not upper bound.
+# Note: this upper bound is NOT inclusive.
+SELECT SUM(new_cases) AS new_cases_before_date
 FROM cases
-WHERE location = 'Singapore' AND DATE < (
-	SELECT MIN(date)
+WHERE location = 'Singapore' 
+AND DATE < 
+(
+	SELECT MIN(date) as date
 	FROM vaccinations
 	WHERE location = 'Singapore'
-	AND daily_vaccinations>0);
+	AND daily_vaccinations > 0
+);
 
 
-####################################################################################################################################################################################################################################################################
-####### 8.	Herd immunity estimation. On a daily basis, specific to Germany, calculate the percentage of new cases (i.e., percentage of new cases = new cases / populations) and total vaccinations on each available vaccine in relation to its population. #######
-####################################################################################################################################################################################################################################################################
-SELECT date, vaccine, new_cases/population * 100 as 'Percentage of New Cases / %', total_vaccinations/population * 100 as 'Percentage of Total Vaccinations / %'
+##################################################################################################
+####### 8.	Herd immunity estimation. On a daily basis, specific to Germany, calculate the #######
+## percentage of new cases (i.e., percentage of new cases = new cases / populations)            ##
+## and total vaccinations on each available vaccine in relation to its population.              ##
+##################################################################################################
+# Join our cases and country_vaccinations_by_manufacturer table with the location table on the composite primary key of country & time.
+# From here, we calculate the percentage of new cases and vaccinations over total population via the formula below, 
+# and group by date and vaccine to show "daily basis" and "each available vaccine" respectively. 
+SELECT date, vaccine, new_cases/population * 100 as 'percentage_of_new_cases_(in %)', total_vaccinations/population * 100 as 'percentage_of_total_vaccinations_(in %)'
 FROM
 cases NATURAL JOIN country_vaccinations_by_manufacturer_sem6_grp2 NATURAL JOIN locations
 WHERE location = 'Germany'
 GROUP BY date, vaccine;
 
 
+<<<<<<< Updated upstream
 ##########################################################################################################################################################################################
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, ######################################################################################################
 ############display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. ###############################################################################
@@ -132,6 +158,36 @@ LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D40_avail_vaccine
 FROM country_vaccinations_by_manufacturer_sem6_grp2 
 WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
 
+=======
+#######################################################################################################
+####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, display the #######
+## total vaccinations of each available vaccines after 20 days, 30 days, and 40 days.                ##
+#######################################################################################################
+SELECT DISTINCT c.date, c.new_cases, c.vaccine, 
+d20.D20_avail_vaccine-c.total_vaccinations AS D20_vaccine, 
+d30.D30_avail_vaccine-c.total_vaccinations AS D30_vaccine, 
+d40.D40_avail_vaccine-c.total_vaccinations AS D40_vaccine  
+FROM
+(
+	SELECT DISTINCT cd.date, 
+	cd.new_cases, cm.vaccine, cm.total_vaccinations, 
+	date_add(cd.date, INTERVAL 20 DAY) AS DAY20, 
+	date_add(cd.date, INTERVAL 30 DAY) AS DAY30, 
+	date_add(cd.date, INTERVAL 40 DAY) AS DAY40
+	FROM cases cd
+	JOIN country_vaccinations_by_manufacturer_sem6_grp2 cm ON cm.date = cd.date
+	WHERE cd.location = 'Germany'
+) c
+LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D20_avail_vaccine 
+			FROM country_vaccinations_by_manufacturer_sem6_grp2 
+            WHERE location = 'Germany') d20 ON d20.date = c.DAY20 AND d20.vaccine = c.vaccine
+LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D30_avail_vaccine 
+			FROM country_vaccinations_by_manufacturer_sem6_grp2 
+            WHERE location = 'Germany') d30 ON d30.date = c.DAY30 AND d30.vaccine = c.vaccine
+LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D40_avail_vaccine 
+			FROM country_vaccinations_by_manufacturer_sem6_grp2 
+            WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
+>>>>>>> Stashed changes
 
 
 ##############################################################################################################################
