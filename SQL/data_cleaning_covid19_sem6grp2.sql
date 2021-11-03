@@ -1,9 +1,9 @@
 SELECT COLUMN_NAME, DATA_TYPE from INFORMATION_SCHEMA.COLUMNS
 WHERE table_name = "covid19data";
 
-# 1. Create a new table called "covid19data_sem6_grp2"
+# 1. Create a new table called "covid19data_cleaned"
 # 2. Set all empty strings to NULL
-CREATE TABLE covid19data_sem6_grp2 AS SELECT 
+CREATE TABLE covid19data_cleaned AS SELECT 
 	NULLIF(iso_code,							'') as iso_code,
     NULLIF(continent, 							'') as continent,
 	NULLIF(location, 							'') as location,
@@ -67,7 +67,7 @@ CREATE TABLE covid19data_sem6_grp2 AS SELECT
 FROM covid19data;
 
 # 3. Change the data types
-ALTER TABLE covid19data_sem6_grp2
+ALTER TABLE covid19data_cleaned
 	#iso_code	-->										TEXT
     #continent	--> 									TEXT
     #location	--> 									TEXT
@@ -131,7 +131,7 @@ ALTER TABLE covid19data_sem6_grp2
 
 # 4. Verify that the datatypes have been changed
 SELECT COLUMN_NAME, DATA_TYPE from INFORMATION_SCHEMA.COLUMNS
-WHERE table_name = "covid19data_sem6_grp2";
+WHERE table_name = "covid19data_cleaned";
 
 # 5. Verify that the data values remain unchanged
-SELECT * FROM covid19data_sem6_grp2;
+SELECT * FROM covid19data_cleaned;
