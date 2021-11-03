@@ -16,8 +16,7 @@ db.country_vaccinations_cleaned.aggregate(
 )
 
 
-/* 3.	Identify the maximum daily vaccinations per million of each country. Sort the list based on daily vaccinations per million in a descending order.
-[source table: country_vaccinations] */
+/* 3.	Identify the maximum daily vaccinations per million of each country. Sort the list based on daily vaccinations per million in a descending order. */
 db.country_vaccinations_cleaned.aggregate(
     {$group: {_id: "$country", max_daily_vaccinations_per_million: {$max: "$daily_vaccinations_per_million_cleaned"}}},
     {$sort: {"max_daily_vaccinations_per_million": -1}},
@@ -25,8 +24,7 @@ db.country_vaccinations_cleaned.aggregate(
     {$project: {_id: 0, "country": "$_id", "max_daily_vaccinations_per_million": "$max_daily_vaccinations_per_million"}}
 )
 
-/* 4.	Which is the most administrated vaccine? Display a list of total administration (i.e., sum of total vaccinations) per vaccine.
-[source table: country_vaccinations_by_manufacturer] */
+/* 4.	Which is the most administrated vaccine? Display a list of total administration (i.e., sum of total vaccinations) per vaccine. */
 db.country_vac_with_covid19data.aggregate(
     {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne:[]}}},
     {$unwind: "$vaccinations_by_manufacturer_data"},
@@ -35,8 +33,7 @@ db.country_vac_with_covid19data.aggregate(
     {$project: {_id: 0,"vaccine": "$_id","total_administrated": "$total_administrated"}}
 )
 
-/* 5.	Italy has commenced administrating various vaccines to its populations as a vaccine becomes available. Identify the first dates of each vaccine being administrated, then compute the difference in days between the earliest date and the 4th date.
-[source table: country_vaccinations_by_manufacturer] */
+/* 5.	Italy has commenced administrating various vaccines to its populations as a vaccine becomes available. Identify the first dates of each vaccine being administrated, then compute the difference in days between the earliest date and the 4th date. */
 db.country_vac_with_covid19data.aggregate(
     {$match: {location: "Italy"}},
     {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne: []}}},
@@ -55,8 +52,7 @@ db.country_vac_with_covid19data.aggregate(
     {$project: {_id: 0, "date_diff": "$date_diff"}}
 )
 
-/* 6.	What is the country with the most types of administrated vaccine?
-[source table: country_vaccinations_by_manufacturer] */
+/* 6.	What is the country with the most types of administrated vaccine? */
 db.country_vac_with_covid19data.aggregate([
     {$group: {_id: {location: "$location", vaccine: "$vaccinations_by_manufacturer_data.vaccine"}}},
     {$project: {_id: 0, location: "$_id.location", all_vaccine:"$_id.vaccine", count: {$size: "$_id.vaccine"}}},
@@ -67,8 +63,7 @@ db.country_vac_with_covid19data.aggregate([
 ])
 
 /* 7.   What are the countries that have fully vaccinated more than 60% of its people? For each
-country, display the vaccines administrated.
-[source table: country_vaccinations] */
+country, display the vaccines administrated. */
 db.country_vaccinations_cleaned.aggregate([
     {$group: {_id: {country: "$country"}, vaccines: {$max: "$vaccines"}, vaccination_percentage: {$max: "$people_fully_vaccinated_per_hundred_cleaned"}}},
     {$match: {"vaccination_percentage": {$gt: 60}}},
@@ -77,8 +72,7 @@ db.country_vaccinations_cleaned.aggregate([
 ])
 
 /* 8. Monthly vaccination insight – display the monthly total vaccination amount of each
-vaccine per month in the United States.
-[source table: country_vaccinations_by_manufacturer]*/
+vaccine per month in the United States. */
 db.country_vac_with_covid19data.aggregate([
     {$match: {location: "United States"}},
     {$match: {"vaccinations_by_manufacturer_data": {$exists: true, $ne:[]}}},
@@ -91,8 +85,7 @@ db.country_vac_with_covid19data.aggregate([
 
 /* 9. Days to 50 percent. Compute the number of days (i.e., using the first available date on
 records of a country) that each country takes to go above the 50% threshold of
-vaccination administration (i.e., total_vaccinations_per_hundred > 50)
-[source table: country_vaccinations] */
+vaccination administration (i.e., total_vaccinations_per_hundred > 50) */
 db.country_vaccinations_cleaned.aggregate([
     {$project: {country: 1, date_cleaned: 1, total_vaccinations_per_hundred_cleaned: 1}},
     {$group: {_id: "$country", minDate: {$min: "$date_cleaned"}, date50: {$min: {$cond: [{$gt: ["$total_vaccinations_per_hundred_cleaned", 50]}, "$date_cleaned", null]}}}},
@@ -110,8 +103,7 @@ db.country_vaccinations_cleaned.aggregate([
 
 
 
-/* 10. Compute the global total of vaccinations per vaccine.
-[source table: country_vaccinations_by_manufacturer]*/
+/* 10. Compute the global total of vaccinations per vaccine. */
 db.country_vac_with_covid19data.aggregate([
     {$match: {"vaccinations_by_manufacturer_data": {$exists: true, $ne: []}}},
     {$unwind: "$vaccinations_by_manufacturer_data"},
