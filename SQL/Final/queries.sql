@@ -33,8 +33,41 @@ SELECT date, daily_vaccinations AS daily_total_vaccinations
 FROM vaccinations 
 WHERE location = 'Singapore' AND date BETWEEN '2021-03-01' AND '2021-05-31';
 
+##################################################################################
+####### 5.	When is the first batch of vaccinations recorded in Singapore? #######
+##################################################################################
+# total_vaccinations:		the total number of COVID-19 vaccination doses administered
+# daily_vaccinations:		for a certain data entry, the number of vaccination for that date/country
+# 1/11/2021 has 3400 total_vaccinations, but 0 under daily_vaccinations
+# 1/12/2021 has 6200 total_vaccinations, but 2800 under daily_vaccinations
+# It is reasonable to assume that total_vaccinations for today is calculated by taking the 
+# total_vaccinations of yesterday plus the daily_vaccinations of today, i.e.
+# total_vaccinations_today = total_vaccinations_yesterday + daily_vaccinations_today.
+# Therefore, the numbers for 1/12/2021 makes sense, since
+# 6200 = 3400 + 2800
+# We cannot do the same confirmation for 1/11/2021, since there is missing data for 1/10/2021 and earlier
+# Hence, 1/12/2021's data is more reliable.
+SELECT MIN(date) as Q5Answer
+FROM vaccinations 
+WHERE location = 'Singapore'
+AND daily_vaccinations > 0;
 
-
+#################################################################################################################################
+####### 6.	Based on the date identified in (5), specific to Singapore, compute the total number of new cases thereafter. #######
+# For instance, if the date identified in (5) is Jan-1 2021, the total number of new cases will be the sum of new cases 
+# starting from (inclusive) Jan-1 to the last date in the dataset.
+################################################################################################################################# 
+# total_cases:		total confirmed cases of COVID-19
+SELECT SUM(new_cases) as Q6Answer
+FROM cases
+WHERE location = 'Singapore'
+AND date >= 
+(
+	SELECT MIN(date) as date
+	FROM vaccinations 
+	WHERE location = 'Singapore'
+	AND daily_vaccinations > 0
+);
 
 
 
