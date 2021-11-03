@@ -24,9 +24,8 @@ WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanm
 #########################################################################
 ####### 3.	Generate a list of unique data sources (source_name). #######
 #########################################################################
-SELECT DISTINCT source_name 
-FROM sources 
-ORDER BY source_name;
+SELECT * 
+FROM sources;
 
 
 ##################################################################################################################################################
