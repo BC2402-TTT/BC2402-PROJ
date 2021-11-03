@@ -41,7 +41,7 @@ ORDER BY unique_data_sources;
 
 ###############################################################################
 ####### 4.	Specific to Singapore, display the daily total_vaccinations #######
-##  starting (inclusive) March-1 2021 through (inclusive) May-31 2021.       ##
+#######	starting (inclusive) March-1 2021 through (inclusive) May-31 2021.   ##
 ###############################################################################
 # We used daily vaccinations instead of raw daily vaccinations as it is cleaned and validated, so it is likely to be more accurate.
 # From now onwards, we will use daily_vaccinations.
@@ -73,8 +73,8 @@ AND daily_vaccinations > 0;
 
 #################################################################################################################################
 ####### 6.	Based on the date identified in (5), specific to Singapore, compute the total number of new cases thereafter. #######
-## For instance, if the date identified in (5) is Jan-1 2021, the total number of new cases will be the sum of new cases       ##
-## starting from (inclusive) Jan-1 to the last date in the dataset. 														   ##
+#######	For instance, if the date identified in (5) is Jan-1 2021, the total number of new cases will be the sum of new cases  ##
+#######	starting from (inclusive) Jan-1 to the last date in the dataset. 													   ##
 ################################################################################################################################# 
 # new_cases:		new confirmed cases of COVID-19
 # Since we want the latest date in the dataset, we only need to set the lower bound of date and not upper bound
@@ -92,9 +92,9 @@ AND date >=
 
 #########################################################################################################
 ####### 7.	Compute the total number of new cases in Singapore before the date identified in (5). #######
-## For instance, if the date identified in (5) is Jan-1 2021 and the first date recorded (in Singapore)##
-## in the dataset is Feb-1 2020, the total number of new cases will be the sum of new cases starting   ##
-## from (inclusive) Feb-1 2020 through (inclusive) Dec-31 2020.                                        ##
+#######	For instance, if the date identified in (5) is Jan-1 2021 and the first date recorded          ##
+####### (in Singapore) in the dataset is Feb-1 2020, the total number of new cases will be the		   ##
+#######	sum of new cases starting from (inclusive) Feb-1 2020 through (inclusive) Dec-31 2020.		   ##
 #########################################################################################################
 # Since we want the earliest date in the dataset, we only need to set the upper bound of date and not upper bound.
 # Note: this upper bound is NOT inclusive.
@@ -112,8 +112,8 @@ AND DATE <
 
 ##################################################################################################
 ####### 8.	Herd immunity estimation. On a daily basis, specific to Germany, calculate the #######
-## percentage of new cases (i.e., percentage of new cases = new cases / populations)            ##
-## and total vaccinations on each available vaccine in relation to its population.              ##
+#######	percentage of new cases (i.e., percentage of new cases = new cases / populations)       ##
+#######	and total vaccinations on each available vaccine in relation to its population.         ##
 ##################################################################################################
 # Join our cases and country_vaccinations_by_manufacturer table with the location table on the composite primary key of country & time.
 # From here, we calculate the percentage of new cases and vaccinations over total population via the formula below, 
@@ -128,105 +128,87 @@ GROUP BY date, vaccine;
 
 #######################################################################################################
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, display the #######
-## total vaccinations of each available vaccines after 20 days, 30 days, and 40 days.                ##
-#######################################################################################################
-# For vaccinations drivers, we want to find out what drivers vaccination
-# Specific to Germany, we find out the number of new cases each day, 
-# then for each different type of vaccine we wanted to find the total
-# number of vaccines administered 20 days later, 30 days later and 40 days later,
-# This is represented by D20_vaccine, D30_vaccine, D40_vaccine.
-SELECT DISTINCT c.date, c.new_cases, c.vaccine,
-d20.D20_avail_vaccine AS D20_vaccine, 
-d30.D30_avail_vaccine AS D30_vaccine
-, d40.D40_avail_vaccine AS D40_vaccine
-FROM
-(SELECT DISTINCT date, cd.new_cases, cm.vaccine, cm.total_vaccinations, date_add(cd.date, interval 20 DAY) AS DAY20, 
-date_add(cd.date, interval 30 DAY) AS DAY30, date_add(cd.date, interval 40 DAY) AS DAY40
-FROM cases cd
-JOIN country_vaccinations_by_manufacturer_sem6_grp2 cm on cm.date = cd.date AND cm.location = cd.location
-WHERE cd.location = 'Germany'
-) c
-LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D20_avail_vaccine 
-FROM country_vaccinations_by_manufacturer_sem6_grp2 
-WHERE location = 'Germany') d20 ON d20.date = c.DAY20 AND d20.vaccine = c.vaccine
-LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D30_avail_vaccine 
-FROM country_vaccinations_by_manufacturer_sem6_grp2 
-WHERE location = 'Germany') d30 ON d30.date = c.DAY30 AND d30.vaccine = c.vaccine
-LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D40_avail_vaccine 
-FROM country_vaccinations_by_manufacturer_sem6_grp2 
-WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
-
-
-
-#######################################################################################################
-####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, display the #######
-## total vaccinations of each available vaccines after 20 days, 30 days, and 40 days.                ##
+####### total vaccinations of each available vaccines after 20 days, 30 days, and 40 days.           ##
 #######################################################################################################
 SELECT DISTINCT c.date, c.new_cases, c.vaccine,
-d20.D20_avail_vaccine AS D20_vaccine, 
-d30.D30_avail_vaccine AS D30_vaccine
-, d40.D40_avail_vaccine AS D40_vaccine
+d20.D20_avail_vaccine AS avail_20_days, 
+d30.D30_avail_vaccine AS avail_30_days,
+d40.D40_avail_vaccine AS avail_40_days
 FROM
-(SELECT DISTINCT cd.date, cd.new_cases, cm.vaccine, cm.total_vaccinations, date_add(cd.date, interval 20 DAY) AS DAY20, 
-date_add(cd.date, interval 30 DAY) AS DAY30, date_add(cd.date, interval 40 DAY) AS DAY40
-FROM cases cd
-JOIN country_vaccinations_by_manufacturer_sem6_grp2 cm on cm.date = cd.date AND cm.location = cd.location
-WHERE cd.location = 'Germany'
+( # Create three columns each containing the same data of 1 date (20, 30 and 40 days later respectively)
+	SELECT DISTINCT cd.date, cd.new_cases, cm.vaccine, cm.total_vaccinations, 
+    date_add(cd.date, interval 20 DAY) AS DAY20, 
+    date_add(cd.date, interval 30 DAY) AS DAY30,
+    date_add(cd.date, interval 40 DAY) AS DAY40
+	FROM cases cd
+	JOIN country_vaccinations_by_manufacturer_sem6_grp2 cm on cm.date = cd.date AND cm.location = cd.location
+	WHERE cd.location = 'Germany'
 ) c
+# Each of these left joins "duplicates" and "shifts" the vaccinations_by_manufacturer table down.
+# We do this three times in total to get the total_vaccinations for 20, 30 and 40 days later respectively.
 LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D20_avail_vaccine 
-FROM country_vaccinations_by_manufacturer_sem6_grp2 
-WHERE location = 'Germany') d20 ON d20.date = c.DAY20 AND d20.vaccine = c.vaccine
+	FROM country_vaccinations_by_manufacturer_sem6_grp2 
+	WHERE location = 'Germany') d20 ON d20.date = c.DAY20 AND d20.vaccine = c.vaccine
 LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D30_avail_vaccine 
-FROM country_vaccinations_by_manufacturer_sem6_grp2 
-WHERE location = 'Germany') d30 ON d30.date = c.DAY30 AND d30.vaccine = c.vaccine
+	FROM country_vaccinations_by_manufacturer_sem6_grp2 
+	WHERE location = 'Germany') d30 ON d30.date = c.DAY30 AND d30.vaccine = c.vaccine
 LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D40_avail_vaccine 
-FROM country_vaccinations_by_manufacturer_sem6_grp2 
-WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
+	FROM country_vaccinations_by_manufacturer_sem6_grp2 
+	WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
 
 
-##############################################################################################################################
-####### 10.	Vaccination Effects. Specific to Germany, on a daily basis, ##################################################
-#######		based on the total number of accumulated vaccinations (sum of total_vaccinations of each vaccine in a day),### 
-#######		generate the daily new cases after 21 days, 60 days, and 120 days. ###########################################
-##############################################################################################################################
 
-# sum of total vaccinations is the sum of all vaccines(accumulating all types: Pfizer/BioNTech, Oxford/AstraZeneca, Moderna, Johnson&Johnson)
-# on each in day in Germany,
-# Taking 2020-12-27 for example, 
-# daily_new_cases_after21days is the daily new cases in Germany 21 days later, which should tally with new cases on 2021-01-17
-# daily_new_cases_after60days is the daily new cases in Germany 60 days later, which should tally with new cases on 2021-02-25
-# daily_new_cases_after120day is the daily new cases in Germany 120 days later, which should tally with new cases on 2021-04-26
+##########################################################################################################
+####### 10.	Vaccination Effects. Specific to Germany, on a daily basis,	based on the total number  #######
+#######	of accumulated vaccinations (sum of total_vaccinations of each vaccine in a day),				##
+#######	generate the daily new cases after 21 days, 60 days, and 120 days.								##
+##########################################################################################################
+# We adopt the same approach as Q9, but implement it using views instead. 
+# Views are an easier way to visualise the querying process. # In mySQL's default settings and 
+# without an ALGORITHM specified, the MERGE setting is automatically used where the statement 
+# retrieves parts of the view definition to replace corresponding parts of the statement in a view resolution.
+# This means that no extra space is required to store the view.
 
-CREATE VIEW q10 AS
-SELECT date , sum(total_vaccinations) AS total
-FROM country_vaccinations_28oct.country_vaccinations_by_manufacturer_sem6_grp2 cm
-WHERE location = "Germany"
-GROUP BY date
-ORDER BY date;
+# View for sum of total_vaccinations across dates for Germany
+CREATE VIEW total AS
+	SELECT 
+		date , SUM(total_vaccinations) AS total
+	FROM country_vaccinations_by_manufacturer_sem6_grp2 cm
+	WHERE location = "Germany"
+	GROUP BY date
+	ORDER BY date;
 
-CREATE VIEW q10_1 AS 
-SELECT *, date_add(q10.date, INTERVAL 21 day) AS d21, date_add(q10.date, INTERVAL 60 day) AS d60, date_add(q10.date, INTERVAL 120 day) AS d120
-FROM q10;
+# Append three columns each containing the same data of 1 date (20, 30 and 40 days later respectively)
+CREATE VIEW total_with_lagged_dates AS 
+	SELECT *, 
+		date_add(total.date, INTERVAL 21 day) AS d21, 
+		date_add(total.date, INTERVAL 60 day) AS d60,
+		date_add(total.date, INTERVAL 120 day) AS d120
+	FROM total;
 
-CREATE VIEW new1 AS 
-SELECT date, new_cases AS day21
-FROM cases
-WHERE location = "Germany";
+# Create three different views for new_cases across dates
+CREATE VIEW day21_cases AS 
+	SELECT date, new_cases AS day21
+	FROM cases
+	WHERE location = "Germany";
 
-CREATE VIEW new2 as 
-SELECT date, new_cases as day60
-FROM cases
-WHERE location = "Germany";
+CREATE VIEW day60_cases as 
+	SELECT date, new_cases as day60
+	FROM cases
+	WHERE location = "Germany";
 
-CREATE VIEW new3 as 
-SELECT date, new_cases AS day120
-FROM cases
-WHERE location = "Germany";
+CREATE VIEW day120_cases as 
+	SELECT date, new_cases AS day120
+	FROM cases
+	WHERE location = "Germany";
 
-SELECT q10_1.date, total AS sum_of_total_vaccinations, day21 AS daily_new_cases_after21days, day60 AS daily_new_cases_after60days, day120 AS daily_new_cases_after120days
-FROM q10_1 
-LEFT JOIN new1 ON q10_1.d21 = new1.date 
-LEFT JOIN new2 ON q10_1.d60 = new2.date
-LEFT JOIN new3 ON q10_1.d120 = new3.date;
+# Join total_with_lagged_dates with the 3 different views on the lagged dates.
+SELECT 
+	total_with_lagged_dates.date, total AS sum_of_total_vaccinations, 
+	day21 AS daily_new_cases_after_21days, day60 AS daily_new_cases_after_60days, day120 AS daily_new_cases_after_120days
+FROM total_with_lagged_dates
+LEFT JOIN day21_cases ON total_with_lagged_dates.d21 = day21_cases.date 
+LEFT JOIN day60_cases ON total_with_lagged_dates.d60 = day60_cases.date
+LEFT JOIN day120_cases ON total_with_lagged_dates.d120 = day120_cases.date;
 
 
