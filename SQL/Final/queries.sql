@@ -11,12 +11,9 @@ HAVING continent = 'Asia';
 ###############################################################################
 ####### 2.	What is the total population among the ten ASEAN countries? #######
 ###############################################################################
-SELECT SUM(population) AS total_asean_population_top_ten
-FROM (SELECT population
-	  FROM locations
-      WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam') 
-      GROUP BY location 
-      ORDER BY population) AS subquery;
+SELECT SUM(population)
+FROM locations
+WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam')
 
 
 #########################################################################
