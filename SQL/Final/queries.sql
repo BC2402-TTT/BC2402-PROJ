@@ -104,29 +104,34 @@ GROUP BY date, vaccine;
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, ######################################################################################################
 ############display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. ###############################################################################
 ##########################################################################################################################################################################################
+#For vaccinations drivers, we want to find out what drivers vaccination
+#Specific to Germany, we find out the number of new cases each day, 
+#then for each different type of vaccine we wanted to find the total
+#number of vaccines administered 20 days later, 30 days later and 40 days later,
+#This is represented by D20_vaccine, D30_vaccine, D40_vaccine.
+
+
 SELECT DISTINCT c.date, c.new_cases, c.vaccine,
 d20.D20_avail_vaccine AS D20_vaccine, 
 d30.D30_avail_vaccine AS D30_vaccine
 , d40.D40_avail_vaccine AS D40_vaccine
 FROM
-(SELECT DISTINCT cd.date, 
-cd.new_cases, cm.vaccine, cm.total_vaccinations, 
-date_add(cd.date, INTERVAL 20 DAY) AS DAY20, 
-date_add(cd.date, INTERVAL 30 DAY) AS DAY30, 
-date_add(cd.date, INTERVAL 40 DAY) AS DAY40
+(SELECT DISTINCT date, cd.new_cases, cm.vaccine, cm.total_vaccinations, date_add(cd.date, interval 20 DAY) AS DAY20, 
+date_add(cd.date, interval 30 DAY) AS DAY30, date_add(cd.date, interval 40 DAY) AS DAY40
 FROM cases cd
-JOIN country_vaccinations_28oct.country_vaccinations_by_manufacturer_sem6_grp2 cm ON cm.date = cd.date and cm.location = cd.location
+JOIN country_vaccinations_by_manufacturer_sem6_grp2 cm on cm.date = cd.date AND cm.location = cd.location
 WHERE cd.location = 'Germany'
 ) c
-LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D20_avail_vaccine 
-			FROM country_vaccinations_28oct.country_vaccinations_by_manufacturer_sem6_grp2 
-            WHERE location = 'Germany') d20 ON d20.date = c.DAY20 AND d20.vaccine = c.vaccine
-LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D30_avail_vaccine 
-			FROM country_vaccinations_28oct.country_vaccinations_by_manufacturer_sem6_grp2 
-            WHERE location = 'Germany') d30 ON d30.date = c.DAY30 AND d30.vaccine = c.vaccine
-LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D40_avail_vaccine 
-			FROM country_vaccinations_28oct.country_vaccinations_by_manufacturer_sem6_grp2 
-            WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
+LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D20_avail_vaccine 
+FROM country_vaccinations_by_manufacturer_sem6_grp2 
+WHERE location = 'Germany') d20 ON d20.date = c.DAY20 AND d20.vaccine = c.vaccine
+LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D30_avail_vaccine 
+FROM country_vaccinations_by_manufacturer_sem6_grp2 
+WHERE location = 'Germany') d30 ON d30.date = c.DAY30 AND d30.vaccine = c.vaccine
+LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D40_avail_vaccine 
+FROM country_vaccinations_by_manufacturer_sem6_grp2 
+WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
+
 
 
 ##############################################################################################################################
