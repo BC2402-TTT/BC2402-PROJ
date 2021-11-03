@@ -74,6 +74,20 @@ AND date >=
 	AND daily_vaccinations > 0
 );
 
+#########################################################################################################
+####### 7.	Compute the total number of new cases in Singapore before the date identified in (5). #######
+# For instance, if the date identified in (5) is Jan-1 2021 and the first date recorded (in Singapore) 
+# in the dataset is Feb-1 2020, the total number of new cases will be the sum of new cases starting 
+# from (inclusive) Feb-1 2020 through (inclusive) Dec-31 2020.
+#########################################################################################################
+SELECT SUM(new_cases) AS new_cases
+FROM cases
+WHERE location = 'Singapore' AND DATE <= (
+	SELECT MIN(date)
+	FROM vaccinations
+	WHERE location = 'Singapore'
+	AND daily_vaccinations>0);
+
 
 ####################################################################################################################################################################################################################################################################
 ####### 8.	Herd immunity estimation. On a daily basis, specific to Germany, calculate the percentage of new cases (i.e., percentage of new cases = new cases / populations) and total vaccinations on each available vaccine in relation to its population. #######
