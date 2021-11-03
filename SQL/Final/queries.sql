@@ -112,3 +112,45 @@ LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D30_avail_vaccine
 LEFT JOIN(SELECT DATE, vaccine, total_vaccinations AS D40_avail_vaccine 
 			FROM country_vaccinations_28oct.country_vaccinations_by_manufacturer_sem6_grp2 
             WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
+
+
+##############################################################################################################################
+####### 10.	Vaccination Effects. Specific to Germany, on a daily basis, ##################################################
+#######		based on the total number of accumulated vaccinations (sum of total_vaccinations of each vaccine in a day),### 
+#######		generate the daily new cases after 21 days, 60 days, and 120 days. ###########################################
+##############################################################################################################################
+
+
+CREATE VIEW q10 AS
+SELECT date , sum(total_vaccinations) AS total
+FROM country_vaccinations_28oct.country_vaccinations_by_manufacturer_sem6_grp2 cm
+WHERE location = "Germany"
+GROUP BY date
+ORDER BY date;
+
+CREATE VIEW q10_1 AS 
+SELECT *, date_add(q10.date, INTERVAL 21 day) AS d21, date_add(q10.date, INTERVAL 60 day) AS d60, date_add(q10.date, INTERVAL 120 day) AS d120
+FROM q10;
+
+CREATE VIEW new1 AS 
+SELECT date, new_cases AS day21
+FROM cases
+WHERE location = "Germany";
+
+CREATE VIEW new2 as 
+SELECT date, new_cases as day60
+FROM cases
+WHERE location = "Germany";
+
+CREATE VIEW new3 as 
+SELECT date, new_cases AS day120
+FROM cases
+WHERE location = "Germany";
+
+SELECT q10_1.date, total AS sum_of_total_vaccinations, day21 AS daily_new_cases_after21days, day60 AS daily_new_cases_after60days, day120 AS daily_new_cases_after120days
+FROM q10_1 
+LEFT JOIN new1 ON q10_1.d21 = new1.date 
+LEFT JOIN new2 ON q10_1.d60 = new2.date
+LEFT JOIN new3 ON q10_1.d120 = new3.date;
+
+
