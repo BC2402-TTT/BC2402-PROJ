@@ -7,6 +7,7 @@ FROM (SELECT population
       WHERE continent = 'Asia'
       GROUP BY location) AS subquery;
       
+
 ###############################################################################
 ####### 2.	What is the total population among the ten ASEAN countries? #######
 ###############################################################################
@@ -25,6 +26,7 @@ SELECT DISTINCT source_name
 FROM sources 
 ORDER BY source_name;
 
+
 ##################################################################################################################################################
 ####### 4.	Specific to Singapore, display the daily total_vaccinations starting (inclusive) March-1 2021 through (inclusive) May-31 2021. #######
 ##################################################################################################################################################
@@ -33,6 +35,7 @@ ORDER BY source_name;
 SELECT date, daily_vaccinations AS daily_total_vaccinations 
 FROM vaccinations 
 WHERE location = 'Singapore' AND date BETWEEN '2021-03-01' AND '2021-05-31';
+
 
 ##################################################################################
 ####### 5.	When is the first batch of vaccinations recorded in Singapore? #######
@@ -53,6 +56,7 @@ FROM vaccinations
 WHERE location = 'Singapore'
 AND daily_vaccinations > 0;
 
+
 #################################################################################################################################
 ####### 6.	Based on the date identified in (5), specific to Singapore, compute the total number of new cases thereafter. #######
 # For instance, if the date identified in (5) is Jan-1 2021, the total number of new cases will be the sum of new cases 
@@ -70,16 +74,16 @@ AND date >=
 	AND daily_vaccinations > 0
 );
 
+
 ####################################################################################################################################################################################################################################################################
 ####### 8.	Herd immunity estimation. On a daily basis, specific to Germany, calculate the percentage of new cases (i.e., percentage of new cases = new cases / populations) and total vaccinations on each available vaccine in relation to its population. #######
 ####################################################################################################################################################################################################################################################################
-SELECT cases.date, new_cases * 100 / population AS percentage_of_new_cases, vaccine, country_vaccinations_by_manufacturer_sem6_grp2.total_vaccinations * 100 / population AS total_vaccinations_against_population, country_vaccinations_by_manufacturer_sem6_grp2.total_vaccinations
-FROM cases 
-INNER JOIN vaccinations ON cases.location = vaccinations.location AND cases.date = vaccinations.date
-INNER JOIN country_vaccinations_by_manufacturer_sem6_grp2 on vaccinations.location = country_vaccinations_by_manufacturer_sem6_grp2.location AND vaccinations.date = country_vaccinations_by_manufacturer_sem6_grp2.date
-INNER JOIN locations ON cases.location = locations.location
-WHERE cases.location = 'Germany' 
-ORDER BY cases.date;
+SELECT date, vaccine, new_cases/population * 100 as 'Percentage of New Cases / %', total_vaccinations/population * 100 as 'Percentage of Total Vaccinations / %'
+FROM
+cases NATURAL JOIN country_vaccinations_by_manufacturer_sem6_grp2 NATURAL JOIN locations
+WHERE location = 'Germany'
+GROUP BY date, vaccine;
+
 
 ##########################################################################################################################################################################################
 ####### 9.	Vaccination Drivers. Specific to Germany, based on each daily new case, ######################################################################################################
