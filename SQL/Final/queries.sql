@@ -73,7 +73,7 @@ AND date >=
 ####################################################################################################################################################################################################################################################################
 ####### 8.	Herd immunity estimation. On a daily basis, specific to Germany, calculate the percentage of new cases (i.e., percentage of new cases = new cases / populations) and total vaccinations on each available vaccine in relation to its population. #######
 ####################################################################################################################################################################################################################################################################
-SELECT cases.date, new_cases / population AS percentage_of_new_cases, vaccine, daily_vaccinations / population AS daily_vaccinations_against_population, daily_vaccinations
+SELECT cases.date, new_cases * 100 / population AS percentage_of_new_cases, vaccine, country_vaccinations_by_manufacturer_sem6_grp2.total_vaccinations * 100 / population AS total_vaccinations_against_population, country_vaccinations_by_manufacturer_sem6_grp2.total_vaccinations
 FROM cases 
 INNER JOIN vaccinations ON cases.location = vaccinations.location AND cases.date = vaccinations.date
 INNER JOIN country_vaccinations_by_manufacturer_sem6_grp2 on vaccinations.location = country_vaccinations_by_manufacturer_sem6_grp2.location AND vaccinations.date = country_vaccinations_by_manufacturer_sem6_grp2.date
