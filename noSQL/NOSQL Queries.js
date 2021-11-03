@@ -15,7 +15,6 @@ db.country_vaccinations_cleaned.aggregate(
     {$project: {_id: 0, "date": "$_id", "total_administrated": "$total_administrated"}}
 )
 
-
 /* 3.	Identify the maximum daily vaccinations per million of each country. Sort the list based on daily vaccinations per million in a descending order. */
 db.country_vaccinations_cleaned.aggregate(
     {$group: {_id: "$country", max_daily_vaccinations_per_million: {$max: "$daily_vaccinations_per_million_cleaned"}}},
@@ -59,11 +58,10 @@ db.country_vac_with_covid19data.aggregate([
     {$sort: {count: -1}},
     {$limit: 1},
     {$unwind: "$all_vaccine"},
-    {$project: {_id: 0,"location": "$location", "vaccine": "$all_vaccine"}}
+    {$project: {_id: 0,"country": "$location", "vaccine": "$all_vaccine"}}
 ])
 
-/* 7.   What are the countries that have fully vaccinated more than 60% of its people? For each
-country, display the vaccines administrated. */
+/* 7.   What are the countries that have fully vaccinated more than 60% of its people? For each country, display the vaccines administrated. */
 db.country_vaccinations_cleaned.aggregate([
     {$group: {_id: {country: "$country"}, vaccines: {$max: "$vaccines"}, vaccination_percentage: {$max: "$people_fully_vaccinated_per_hundred_cleaned"}}},
     {$match: {"vaccination_percentage": {$gt: 60}}},
@@ -71,8 +69,7 @@ db.country_vaccinations_cleaned.aggregate([
     {$sort: {vaccination_percentage: -1}}
 ])
 
-/* 8. Monthly vaccination insight – display the monthly total vaccination amount of each
-vaccine per month in the United States. */
+/* 8. Monthly vaccination insight – display the monthly total vaccination amount of each vaccine per month in the United States. */
 db.country_vac_with_covid19data.aggregate([
     {$match: {location: "United States"}},
     {$match: {"vaccinations_by_manufacturer_data": {$exists: true, $ne:[]}}},
@@ -83,9 +80,7 @@ db.country_vac_with_covid19data.aggregate([
     {$sort: {month: 1}}
 ])
 
-/* 9. Days to 50 percent. Compute the number of days (i.e., using the first available date on
-records of a country) that each country takes to go above the 50% threshold of
-vaccination administration (i.e., total_vaccinations_per_hundred > 50) */
+/* 9. Days to 50 percent. Compute the number of days (i.e., using the first available date on records of a country) that each country takes to go above the 50% threshold of vaccination administration (i.e., total_vaccinations_per_hundred > 50) */
 db.country_vaccinations_cleaned.aggregate([
     {$project: {country: 1, date_cleaned: 1, total_vaccinations_per_hundred_cleaned: 1}},
     {$group: {_id: "$country", minDate: {$min: "$date_cleaned"}, date50: {$min: {$cond: [{$gt: ["$total_vaccinations_per_hundred_cleaned", 50]}, "$date_cleaned", null]}}}},
@@ -98,10 +93,8 @@ db.country_vaccinations_cleaned.aggregate([
         }
     }}},
     {$sort: {date_diff: -1}},
-    {$project: {_id: 0, "country": "$_id", "date_diff": "$date_diff"}}
+    {$project: {_id: 0, "country": "$_id", "days_to_over_50%": "$date_diff"}}
 ])
-
-
 
 /* 10. Compute the global total of vaccinations per vaccine. */
 db.country_vac_with_covid19data.aggregate([
@@ -112,8 +105,6 @@ db.country_vac_with_covid19data.aggregate([
     {$project: {_id: 0, vaccine: "$_id.vaccine", global_total: "$global_total"}},
     {$sort: {global_total: -1}}
 ])
-
-
 
 
 
