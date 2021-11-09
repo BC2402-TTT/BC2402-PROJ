@@ -134,7 +134,7 @@ db.country_vaccinations_cleaned.aggregate([
     {$project: {_id:0, date_cleaned: 1, daily_vaccinations: 1}},
     {$sort: {"date_cleaned": 1}}
 ])
-    
+
 /* 15. When is the first batch of vaccinations recorded in Singapore? */
 db.country_vaccinations_cleaned.aggregate([
     {$match: {$and: [{country: "Singapore"}, {daily_vaccinations_cleaned: {$gt: 0}}]}},
@@ -142,7 +142,7 @@ db.country_vaccinations_cleaned.aggregate([
     {$limit: 1},
     {$project: {_id: 0, "first_batch_of_vaccinations":"$date_cleaned"}}
 ])
-    
+
 /* 16. Based on the date identified in (5), specific to Singapore, compute the total number of new cases thereafter.
 For instance, if the date identified in (5) is Jan-1 2021, the total number of new cases will be the sum of new cases starting from (inclusive) Jan-1 to the last date in the dataset. */
 db.country_vac_with_covid19data.aggregate([
@@ -179,24 +179,24 @@ db.country_vac_with_covid19data.aggregate([
         from: "country_vac_with_covid19data",
         let: {date20: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount: 20}}, location: "$location"},
         pipeline: [{$match: {$expr: {$and: [{$eq: ["$date_cleaned", "$$date20"]}, {$eq: ["$location", "$$location"]}]}}}],
-        as: "day20"
+        as: "day_20"
     }},
     {$lookup: {
         from: "country_vac_with_covid19data",
         let: {date30: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount:30}}, location: "$location"},
         pipeline: [{$match: {$expr: {$and: [{$eq:["$date_cleaned", "$$date30"]}, {$eq:["$location", "$$location"]}]}}}],
-        as:"day30"
+        as:"day_30"
     }},
     {$lookup:{
         from: "country_vac_with_covid19data",
         let: {date40: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount:40}}, location: "$location"},
         pipeline: [{$match: {$expr: {$and: [{$eq:["$date_cleaned", "$$date40"]}, {$eq: ["$location", "$$location"]}]}}}],
-        as:"day40"
+        as:"day_40"
     }},
-    {$project: {_id: 0, date: 1, new_cases_cleaned: 1, day20: "$day20.vaccinations_by_manufacturer_data", day30: "$day30.vaccinations_by_manufacturer_data", day40: "$day40.vaccinations_by_manufacturer_data"}},
-    {$project: {date: 1, new_cases_cleaned: 1, "day20.vaccine": 1, "day20.total_vaccinations_cleaned": 1, "day30.vaccine": 1, "day30.total_vaccinations_cleaned": 1, "day40.vaccine": 1, "day40.total_vaccinations_cleaned": 1}}
+    {$project: {_id: 0, date: 1, new_cases_cleaned: 1, day_20: "$day_20.vaccinations_by_manufacturer_data", day_30: "$day_30.vaccinations_by_manufacturer_data", day_40: "$day_40.vaccinations_by_manufacturer_data"}},
+    {$project: {date: 1, new_cases_cleaned: 1, "day_20.vaccine": 1, "day_20.total_vaccinations_cleaned": 1, "day_30.vaccine": 1, "day_30.total_vaccinations_cleaned": 1, "day_40.vaccine": 1, "day_40.total_vaccinations_cleaned": 1}}
 ])
-            
+
 /* 20. Vaccination Effects. Specific to Germany, on a daily basis, based on the total number of accumulated vaccinations (sum of total_vaccinations of each vaccine in a day), generate the daily new cases after 21 days, 60 days, and 120 days. */
 db.country_vac_with_covid19data.aggregate([
     {$match: {location:"Germany"}},
