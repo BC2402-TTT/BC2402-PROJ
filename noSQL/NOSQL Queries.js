@@ -173,77 +173,46 @@ db.country_vac_with_covid19data.aggregate([
 
 /* 19. Vaccination Drivers. Specific to Germany, based on each daily new case, display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. */
 db.country_vac_with_covid19data.aggregate([
-    {$match: {location:"Germany"}},
-    {$match:{vaccinations_by_manufacturer_data:{$exists:true, $ne:[]}}},
-    {$lookup:{
+    {$match: {location: "Germany"}},
+    {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne: []}}},
+    {$lookup: {
         from: "country_vac_with_covid19data",
-        let: {date20: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount:20}}, location: "$location"},
-        pipeline:[
-            {$match:
-                {$expr:
-                {$and:
-                [{$eq:["$date_cleaned", "$$date20"]}, {$eq:["$location", "$$location"]}]
-                }}}]
-        as:"day20"}},
-    {$lookup:{
+        let: {date20: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount: 20}}, location: "$location"},
+        pipeline: [{$match: {$expr: {$and: [{$eq: ["$date_cleaned", "$$date20"]}, {$eq: ["$location", "$$location"]}]}}}],
+        as: "day20"
+    }},
+    {$lookup: {
         from: "country_vac_with_covid19data",
         let: {date30: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount:30}}, location: "$location"},
-        pipeline:[
-            {$match:
-                {$expr:
-                {$and:
-                [{$eq:["$date_cleaned", "$$date30"]}, {$eq:["$location", "$$location"]}]
-                }}}]
-        as:"day30"}},
+        pipeline: [{$match: {$expr: {$and: [{$eq:["$date_cleaned", "$$date30"]}, {$eq:["$location", "$$location"]}]}}}],
+        as:"day30"
+    }},
     {$lookup:{
         from: "country_vac_with_covid19data",
         let: {date40: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount:40}}, location: "$location"},
-        pipeline:[
-            {$match:
-                {$expr:
-                {$and:
-                [{$eq:["$date_cleaned", "$$date40"]}, {$eq:["$location", "$$location"]}]
-                }}}]
-        as:"day40"}},
-    {$project:{date:1, new_cases_cleaned:1, day20:"$day20.vaccinations_by_manufacturer_data", day30: "$day30.vaccinations_by_manufacturer_data",
-                day40:"$day40.vaccinations_by_manufacturer_data"}}
+        pipeline: [{$match: {$expr: {$and: [{$eq:["$date_cleaned", "$$date40"]}, {$eq: ["$location", "$$location"]}]}}}],
+        as:"day40"
+    }},
+    {$project: {_id: 0, date: 1, new_cases_cleaned: 1, day20: "$day20.vaccinations_by_manufacturer_data", day30: "$day30.vaccinations_by_manufacturer_data", day40: "$day40.vaccinations_by_manufacturer_data"}},
+    {$project: {date: 1, new_cases_cleaned: 1, "day20.vaccine": 1, "day20.total_vaccinations_cleaned": 1, "day30.vaccine": 1, "day30.total_vaccinations_cleaned": 1, "day40.vaccine": 1, "day40.total_vaccinations_cleaned": 1}}
 ])
             
 /* 20. Vaccination Effects. Specific to Germany, on a daily basis, based on the total number of accumulated vaccinations (sum of total_vaccinations of each vaccine in a day), generate the daily new cases after 21 days, 60 days, and 120 days. */
 db.country_vac_with_covid19data.aggregate([
-    {$match:{location:"Germany"}},
-    {$lookup:{
-        from:"country_vac_with_covid19data", 
-        let:{date21: {$dateAdd:{startDate:"$date_cleaned", unit:"day", amount:21}}, location:"$location"},
-        pipeline:[
-            {$match:
-                {$expr:
-                {$and:
-                [{$eq:["$date_cleaned", "$$date21"]}, {$eq:["$location", "$$location"]}]
-                }}}]
+    {$match: {location:"Germany"}},
+    {$lookup: {
+        from:"country_vac_with_covid19data",
+        let:{date21: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount: 21}}, location: "$location"},
+        pipeline:[{$match: {$expr: {$and: [{$eq: ["$date_cleaned", "$$date21"]}, {$eq: ["$location", "$$location"]}]}}}],
         as:"day21"}},
-    {$lookup:{
-        from:"country_vac_with_covid19data", 
-        let:{date60: {$dateAdd:{startDate:"$date_cleaned", unit:"day", amount:60}}, location:"$location"},
-        pipeline:[
-            {$match:
-                {$expr:
-                {$and:
-                [{$eq:["$date_cleaned", "$$date60"]}, {$eq:["$location", "$$location"]}]
-                }}}]
-        as:"day60"}},
-    {$lookup:{
-        from:"country_vac_with_covid19data", 
-        let:{date120: {$dateAdd:{startDate:"$date_cleaned", unit:"day", amount:120}}, location:"$location"},
-        pipeline:[
-            {$match:
-                {$expr:
-                {$and:
-                [{$eq:["$date_cleaned", "$$date120"]}, {$eq:["$location", "$$location"]}]
-                }}}]
-        as:"day120"}},
-    {$match:{vaccinations_by_manufacturer_data:{$exists:true, $ne:[]}}},
-    {$project:{_id:0, date:"$date_cleaned", totalVaccinations:{$sum:"$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}, cases_21: "$day21.new_cases_cleaned",
-        cases_60: "$day60.new_cases_cleaned", cases_120: "$day120.new_cases_cleaned"
-    }}
+    {$lookup: {
+        from: "country_vac_with_covid19data",
+        let: {date60: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount: 60}}, location: "$location"},
+        pipeline: [{$match: {$expr: {$and: [{$eq: ["$date_cleaned", "$$date60"]}, {$eq: ["$location", "$$location"]}]}}}],
+        as: "day60"}},
+    {$lookup: {from: "country_vac_with_covid19data", let: {date120: {$dateAdd: {startDate: "$date_cleaned", unit: "day", amount: 120}}, location: "$location"},
+        pipeline: [{$match: {$expr: {$and: [{$eq: ["$date_cleaned", "$$date120"]}, {$eq: ["$location", "$$location"]}]}}}],
+        as: "day120"}},
+    {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne: []}}},
+    {$project: {_id: 0, date: "$date_cleaned", total_vaccinations: {$sum: "$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}, cases_21: "$day21.new_cases_cleaned", cases_60: "$day60.new_cases_cleaned", cases_120: "$day120.new_cases_cleaned"}}
 ])
