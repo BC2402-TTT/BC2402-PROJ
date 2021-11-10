@@ -6,7 +6,7 @@
 # this returns a table of all the Asian countries.
 # Then we apply an aggregate SUM() function on the population column to obtain a single value response.
 SELECT SUM(population)
-FROM locations
+FROM location
 GROUP BY continent
 HAVING continent = 'Asia';
 
@@ -17,7 +17,7 @@ HAVING continent = 'Asia';
 # The normalised "locations" table contains the population count for each country.
 # We then sum the populations of rows that are in ASEAN.
 SELECT SUM(population)
-FROM locations
+FROM location
 WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam');
 
 
@@ -35,7 +35,8 @@ WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanm
 ##	ORDER BY unique_data_sources;	
 # We get 147 rows instead of 91.
 SELECT DISTINCT(source_name) as unique_data_sources
-FROM sources
+FROM location
+WHERE source_name IS NOT NULL #select is not null since sources is left-joined with locations
 ORDER BY unique_data_sources;
 
 
@@ -120,7 +121,7 @@ AND DATE <
 # and group by date and vaccine to show "daily basis" and "each available vaccine" respectively. 
 SELECT date, vaccine, new_cases/population * 100 as 'percentage_of_new_cases_(in %)', total_vaccinations/population * 100 as 'percentage_of_total_vaccinations_(in %)'
 FROM
-cases NATURAL JOIN country_vaccinations_by_manufacturer_sem6_grp2 NATURAL JOIN locations
+cases NATURAL JOIN country_vaccinations_by_manufacturer_cleaned NATURAL JOIN location
 WHERE location = 'Germany'
 GROUP BY date, vaccine;
 
@@ -141,19 +142,19 @@ FROM
     date_add(cd.date, interval 30 DAY) AS DAY30,
     date_add(cd.date, interval 40 DAY) AS DAY40
 	FROM cases cd
-	JOIN country_vaccinations_by_manufacturer_sem6_grp2 cm on cm.date = cd.date AND cm.location = cd.location
+	JOIN country_vaccinations_by_manufacturer_cleaned cm on cm.date = cd.date AND cm.location = cd.location
 	WHERE cd.location = 'Germany'
 ) c
 # Each of these left joins "duplicates" and "shifts" the vaccinations_by_manufacturer table down.
 # We do this three times in total to get the total_vaccinations for 20, 30 and 40 days later respectively.
 LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D20_avail_vaccine 
-	FROM country_vaccinations_by_manufacturer_sem6_grp2 
+	FROM country_vaccinations_by_manufacturer_cleaned 
 	WHERE location = 'Germany') d20 ON d20.date = c.DAY20 AND d20.vaccine = c.vaccine
 LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D30_avail_vaccine 
-	FROM country_vaccinations_by_manufacturer_sem6_grp2 
+	FROM country_vaccinations_by_manufacturer_cleaned
 	WHERE location = 'Germany') d30 ON d30.date = c.DAY30 AND d30.vaccine = c.vaccine
 LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D40_avail_vaccine 
-	FROM country_vaccinations_by_manufacturer_sem6_grp2 
+	FROM country_vaccinations_by_manufacturer_cleaned
 	WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
 
 
@@ -173,7 +174,7 @@ LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D40_avail_vaccine
 CREATE VIEW total AS
 	SELECT 
 		date , SUM(total_vaccinations) AS total
-	FROM country_vaccinations_by_manufacturer_sem6_grp2 cm
+	FROM country_vaccinations_by_manufacturer_cleaned cm
 	WHERE location = "Germany"
 	GROUP BY date
 	ORDER BY date;
@@ -210,5 +211,5 @@ FROM total_with_lagged_dates
 LEFT JOIN day21_cases ON total_with_lagged_dates.d21 = day21_cases.date 
 LEFT JOIN day60_cases ON total_with_lagged_dates.d60 = day60_cases.date
 LEFT JOIN day120_cases ON total_with_lagged_dates.d120 = day120_cases.date;
-
+DROP VIEW day120_cases, daexy21_cases, day60_cases, total, total_with_lagged_dates
 

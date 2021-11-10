@@ -1,13 +1,7 @@
-CREATE TABLE case_test AS SELECT 
+CREATE TABLE tests AS SELECT
 	location, date,
-	# CASES, TESTS
-	total_cases,
-	new_cases,
-	total_cases_per_million,
-	new_cases_smoothed,
-	new_cases_per_million,
-	new_cases_smoothed_per_million,
-	tests_units,
+	# TESTS
+    tests_units,
 	total_tests,	
 	new_tests,				
 	total_tests_per_thousand,			  
@@ -16,22 +10,21 @@ CREATE TABLE case_test AS SELECT
 	new_tests_smoothed_per_thousand,
 	positive_rate,
 	tests_per_case
-FROM covid19data_sem6_grp2;
-SELECT * FROM case_test;
+FROM covid19data_cleaned;
 
-CREATE TABLE death AS SELECT
+CREATE TABLE cases AS SELECT 
 	location, date,
-	# DEATHS
-	total_deaths,
-	new_deaths,
-	new_deaths_smoothed,
-	total_deaths_per_million,
-	new_deaths_per_million,
-	new_deaths_smoothed_per_million
-FROM covid19data_sem6_grp2;
-SELECT * FROM death;
+	# CASES
+	total_cases,
+	new_cases,
+	total_cases_per_million,
+	new_cases_smoothed,
+	new_cases_per_million,
+	new_cases_smoothed_per_million,
+	reproduction_rate
+FROM covid19data_cleaned;
 
-CREATE TABLE hospital AS SELECT
+CREATE TABLE hospitals AS SELECT
 	location, date,
 	#HOSPITAL		
 	icu_patients,
@@ -42,22 +35,29 @@ CREATE TABLE hospital AS SELECT
 	weekly_icu_admissions_per_million,	
 	weekly_hosp_admissions,	
 	weekly_hosp_admissions_per_million
-FROM covid19data_sem6_grp2;
-SELECT * FROM hospital;
+FROM covid19data_cleaned;
 
-CREATE TABLE vaccination AS
-SELECT * FROM country_vaccinations_sem6_grp2
+CREATE TABLE deaths AS SELECT
+	location, date,
+	# DEATHS
+	total_deaths,
+	new_deaths,
+	new_deaths_smoothed,
+	total_deaths_per_million,
+	new_deaths_per_million,
+	new_deaths_smoothed_per_million,
+	excess_mortality
+FROM covid19data_cleaned;
+
+CREATE TABLE stringency AS SELECT 
+	location, date,
+	stringency_index
+FROM covid19data_cleaned;
+
+CREATE TABLE vaccinations AS
+SELECT * FROM country_vaccinations_cleaned
 NATURAL JOIN 
 (
-SELECT location, date, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million FROM covid19data_sem6_grp2
+SELECT location, date, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million FROM covid19data_cleaned
 ) t;
-#ON country_vaccinations_sem6_grp2.location = t.location AND country_vaccinations_sem6_grp2.date = t.date;
-SELECT * FROM vaccination;
-
-CREATE TABLE disease AS SELECT 
-	location, date,
-	# DISEASE
-	stringency_index,
-	excess_mortality,
-	reproduction_rate
-FROM covid19data_sem6_grp2;
+#ON country_vaccinations_cleaned.location = t.location AND country_vaccinations_cleaned.date = t.date;

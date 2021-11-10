@@ -1,41 +1,4 @@
-# Create dimension table for country statistics
-CREATE TABLE locations AS SELECT 
-	location, iso_code, continent, population, population_density, median_age, aged_65_older, aged_70_older
-    , gdp_per_capita, extreme_poverty, cardiovasc_death_rate, diabetes_prevalence, female_smokers, male_smokers
-    , handwashing_facilities, hospital_beds_per_thousand, life_expectancy, human_development_index
-FROM covid19data_cleaned
-GROUP BY location;
-
-# Drop related data from covid19 table
-ALTER TABLE covid19data_cleaned
-	DROP iso_code, 
-    DROP continent,
-    DROP /*tests_units,*/ population, 
-    DROP population_density, 
-    DROP median_age, 
-    DROP aged_65_older,
-    DROP aged_70_older,
-    DROP gdp_per_capita, 
-    DROP extreme_poverty, 
-    DROP cardiovasc_death_rate,
-    DROP diabetes_prevalence, 
-    DROP female_smokers,
-    DROP male_smokers,
-    DROP handwashing_facilities, 
-    DROP hospital_beds_per_thousand, 
-    DROP life_expectancy,
-    DROP human_development_index;
-SELECT * FROM covid19data_cleaned;
-
-# Drop related column from country_vaccinations and rename country column to location
-ALTER TABLE country_vaccinations_cleaned
-	DROP iso_code,
-    RENAME COLUMN country TO location;
-
-SELECT * FROM locations;
-
-####################################################################################
-
+# 0. Verify which columns contain information about the location.
 SELECT 
 	#COUNT(DISTINCT iso_code)							 as iso_code,
     #COUNT(DISTINCT continent) 							 as continent,
@@ -99,11 +62,75 @@ SELECT
     COUNT(DISTINCT excess_mortality)					 as excess_mortality
 FROM covid19data_cleaned
 GROUP BY location;
+# the attributes that have been commented out are the information attributes
 
-;SELECT 
-	location,
-    COUNT(DISTINCT date),
-    COUNT(DISTINCT source_name),
-    COUNT(DISTINCT source_website)
-FROM country_vaccinations
+# 1. Create locations table
+CREATE TABLE locations AS SELECT 
+	location, iso_code, continent, population, population_density, median_age, aged_65_older, aged_70_older
+    , gdp_per_capita, extreme_poverty, cardiovasc_death_rate, diabetes_prevalence, female_smokers, male_smokers
+    , handwashing_facilities, hospital_beds_per_thousand, life_expectancy, human_development_index
+FROM covid19data_cleaned
 GROUP BY location;
+
+# 2. Drop related data from covid19 table
+ALTER TABLE covid19data_cleaned
+	DROP iso_code,
+    DROP continent,
+    DROP population, 
+    DROP population_density, 
+    DROP median_age, 
+    DROP aged_65_older,
+    DROP aged_70_older,
+    DROP gdp_per_capita, 
+    DROP extreme_poverty, 
+    DROP cardiovasc_death_rate,
+    DROP diabetes_prevalence, 
+    DROP female_smokers,
+    DROP male_smokers,
+    DROP handwashing_facilities, 
+    DROP hospital_beds_per_thousand, 
+    DROP life_expectancy,
+    DROP human_development_index;
+
+# 3. Also deal with source_name and source_website to location attributes
+SELECT 
+    country,
+	COUNT(DISTINCT source_name)							 as source_name,
+    COUNT(DISTINCT source_website)						 as source_website
+FROM country_vaccinations_cleaned
+GROUP BY country; #217 rows. We must perform a left join
+
+# 3.1. Rename country column to location
+ALTER TABLE country_vaccinations_cleaned
+    RENAME COLUMN country TO location;
+
+# 3.2. Join sources with location to form new table
+CREATE TABLE location2 AS SELECT 
+	locations.location, iso_code, continent, population, population_density, median_age, aged_65_older, aged_70_older
+    , gdp_per_capita, extreme_poverty, cardiovasc_death_rate, diabetes_prevalence, female_smokers, male_smokers
+    , handwashing_facilities, hospital_beds_per_thousand, life_expectancy, human_development_index, source_name, source_website
+FROM locations
+LEFT JOIN
+(
+SELECT location, source_name, source_website FROM country_vaccinations_cleaned
+GROUP BY location
+) t ON locations.location = t.location;
+
+# 3.3. Override current location table with new table
+DROP TABLE locations;
+ALTER TABLE location2
+  RENAME TO location;
+
+# 4. Create iso_code table
+SELECT location, iso_code FROM location; #213 rows
+SELECT location, iso_code FROM country_vaccinations_cleaned GROUP BY location; #217 rows
+# locations has the full 230 iso_codes, while country_vaccinations only has 217. Hence we use locations
+
+CREATE TABLE iso_code AS SELECT
+location, iso_code FROM location;
+
+# 5. Drop iso_code
+ALTER TABLE location
+	DROP iso_code;
+ALTER TABLE country_vaccinations_cleaned
+	DROP iso_code;

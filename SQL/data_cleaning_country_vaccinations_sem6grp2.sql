@@ -4,9 +4,10 @@ WHERE table_name = "country_vaccinations";
 # 1. Create a new table called "country_vaccinations_cleaned"
 CREATE TABLE country_vaccinations_cleaned AS SELECT * FROM country_vaccinations;
 
-# 2. Change the formatting of the DATE column to proper mySQL format. We need to do this, else mySQL cannot modify the column to be DATE datatype in the next step
+# 2. Change the formatting of the DATE column to proper mySQL format. 
+# We need to do this, else mySQL cannot modify the column to be DATE datatype in the next step
 # Note: need to set SAFE_UPDATES flag to off because we are not specifying a primary key in the WHERE clause -
-## we don't need to, because every row has to be updated anyway.
+# we don't need to, because every row has to be updated anyway.
 # We set the flag back on afterward
 SET SQL_SAFE_UPDATES = 0;
 UPDATE country_vaccinations_cleaned SET date = STR_TO_DATE(date, '%c/%e/%Y');

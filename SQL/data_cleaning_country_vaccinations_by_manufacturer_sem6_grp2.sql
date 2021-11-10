@@ -5,7 +5,7 @@ WHERE table_name = "country_vaccinations_by_manufacturer";
 CREATE TABLE country_vaccinations_by_manufacturer_cleaned AS SELECT * FROM country_vaccinations_by_manufacturer;
 
 # 2. The formatting of date here is correct (unlike country_vaccinations)
-# Hence, we don't need to transform anything. very good
+# Hence, we don't need to transform anything.
 
 # 3. Change the data types
 ALTER TABLE country_vaccinations_by_manufacturer_cleaned
