@@ -119,7 +119,7 @@ AND DATE <
 # Join our cases and country_vaccinations_by_manufacturer table with the location table on the composite primary key of country & time.
 # From here, we calculate the percentage of new cases and vaccinations over total population via the formula below, 
 # and group by date and vaccine to show "daily basis" and "each available vaccine" respectively. 
-SELECT date, vaccine, new_cases/population * 100 as 'percentage_of_new_cases_(in %)', total_vaccinations/population * 100 as 'percentage_of_total_vaccinations_(in %)'
+SELECT date, vaccine, new_cases/population * 100 as 'percentage_of_new_cases_(in %)', total_vaccinations/population * 100 as 'percentage_of_total_vaccinations_relative_to_population_(in %)'
 FROM
 cases NATURAL JOIN country_vaccinations_by_manufacturer_cleaned NATURAL JOIN location
 WHERE location = 'Germany'
