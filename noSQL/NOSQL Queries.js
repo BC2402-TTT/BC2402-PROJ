@@ -77,7 +77,7 @@ db.country_vac_with_covid19data.aggregate([
     {$unwind: "$vaccinations_by_manufacturer_data"},
     {$project: {_id: 0, month: {$month: "$date_cleaned"}, "vaccine": "$vaccinations_by_manufacturer_data.vaccine", "total_vaccinations_cleaned": "$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}},
     {$group: {_id: {month: "$month", vaccine: "$vaccine"}, monthly_total_vaccination: {$max: "$total_vaccinations_cleaned"}}},
-    {$project: {_id: 0,"month": "$_id.month", "vaccine": "$_id.vaccine", monthly_total_vaccination: 1}},
+    {$project: {_id: 0,"month": "$_id.month", "vaccine": "$_id.vaccine", "monthly_total_vaccination": "$monthly_total_vaccination"}},
     {$sort: {month: 1}}
 ])
 
