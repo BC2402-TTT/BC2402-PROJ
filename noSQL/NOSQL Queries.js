@@ -38,6 +38,7 @@ db.country_vac_with_covid19data.aggregate(
     {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne: []}}},
     {$unwind: "$vaccinations_by_manufacturer_data"},
     {$group: {_id: "$vaccinations_by_manufacturer_data.vaccine", date: {$min: "$date_cleaned"}}},
+    {$sort: {"date": 1}},
     {$project: {_id: 0, "vaccine": "$_id", "date": "$date"}}
 )
 
@@ -65,7 +66,7 @@ db.country_vac_with_covid19data.aggregate([
 db.country_vaccinations_cleaned.aggregate([
     {$group: {_id: {country: "$country"}, vaccines: {$max: "$vaccines"}, vaccination_percentage: {$max: "$people_fully_vaccinated_per_hundred_cleaned"}}},
     {$match: {"vaccination_percentage": {$gt: 60}}},
-    {$project: {_id: 0, "country":"$_id.country", vaccines: 1, vaccination_percentage: 1}},
+    {$project: {_id: 0, "country":"$_id.country", "vaccines": "$vaccines", "vaccination_percentage": "$vaccination_percentage"}},
     {$sort: {vaccination_percentage: -1}}
 ])
 
@@ -76,7 +77,7 @@ db.country_vac_with_covid19data.aggregate([
     {$unwind: "$vaccinations_by_manufacturer_data"},
     {$project: {_id: 0, month: {$month: "$date_cleaned"}, "vaccine": "$vaccinations_by_manufacturer_data.vaccine", "total_vaccinations_cleaned": "$vaccinations_by_manufacturer_data.total_vaccinations_cleaned"}},
     {$group: {_id: {month: "$month", vaccine: "$vaccine"}, monthly_total_vaccination: {$max: "$total_vaccinations_cleaned"}}},
-    {$project: {_id: 0,"month": "$_id.month", "vaccine": "$_id.vaccine", monthly_total_vaccination: 1}},
+    {$project: {_id: 0,"month": "$_id.month", "vaccine": "$_id.vaccine", "monthly_total_vaccination": "$monthly_total_vaccination"}},
     {$sort: {month: 1}}
 ])
 
@@ -92,8 +93,8 @@ db.country_vaccinations_cleaned.aggregate([
             unit: "day"
         }
     }}},
-    {$sort: {date_diff: -1}},
-    {$project: {_id: 0, "country": "$_id", "days_to_over_50%": "$date_diff"}}
+    {$project: {_id: 0, "country": "$_id", "days_to_over_50%": "$date_diff"}},
+    {$sort: {"country": 1}}
 ])
 
 /* 10. Compute the global total of vaccinations per vaccine. */
@@ -131,7 +132,7 @@ db.country_vaccinations_cleaned.aggregate([
 /* 14. Specific to Singapore, display the daily total_vaccinations starting (inclusive) March-1 2021 through (inclusive) May-31 2021. */
 db.country_vaccinations_cleaned.aggregate([
     {$match: { $and: [ {country: "Singapore"}, {date_cleaned: {$gte: ISODate("2021-03-01"), $lt: ISODate("2021-04-01")}}]}},
-    {$project: {_id:0, date_cleaned: 1, daily_vaccinations: 1}},
+    {$project: {_id:0, date_cleaned: 1, "daily_vaccinations": "$daily_vaccinations"}},
     {$sort: {"date_cleaned": 1}}
 ])
 
@@ -167,9 +168,10 @@ db.country_vac_with_covid19data.aggregate([
     {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne: []}}},
     {$unwind: "$vaccinations_by_manufacturer_data"},
     {$project: {date: "$date_cleaned", "percentage_of_new_cases_(in %)": {$multiply: [{$divide: ["$new_cases_cleaned", "$population_cleaned"]}, 100]}, vaccine: "$vaccinations_by_manufacturer_data.vaccine", "percentage_of_total_vaccinations_(in %)": {$multiply: [{$divide: ["$vaccinations_by_manufacturer_data.total_vaccinations_cleaned", "$population_cleaned"]}, 100]}}},
-    {$project: {_id: 0, date: 1, "percentage_of_new_cases_(in %)": 1, vaccine: 1, "percentage_of_total_vaccinations_(in %)": 1}},
+    {$project: {_id: 0, date: 1, vaccine: "$vaccine", "percentage_of_new_cases_(in %)": "$percentage_of_new_cases_(in %)", "percentage_of_total_vaccinations_(in %)": "$percentage_of_total_vaccinations_(in %)"}},
     {$sort: {date: 1, vaccine: -1}}
 ])
+
 
 /* 19. Vaccination Drivers. Specific to Germany, based on each daily new case, display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. */
 db.country_vac_with_covid19data.aggregate([
