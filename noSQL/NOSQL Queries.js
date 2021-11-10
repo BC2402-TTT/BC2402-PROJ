@@ -164,6 +164,7 @@ db.country_vac_with_covid19data.aggregate([
 ])
 
 /* 18. Herd immunity estimation. On a daily basis, specific to Germany, calculate the percentage of new cases and total vaccinations on each available vaccine in relation to its population. */
+//note percentage of total vaccinations relative to population is calculated as a % as well
 db.country_vac_with_covid19data.aggregate([
     {$match: {location: "Germany"}},
     {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne: []}}},
