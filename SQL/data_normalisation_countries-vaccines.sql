@@ -32,7 +32,7 @@ UNION SELECT country as location, vaccine5 as vaccine FROM spliced
 UNION SELECT country as location, vaccine6 as vaccine FROM spliced
 GROUP BY location, vaccine1
 ORDER BY location ASC;
-SELECT * FROM locations_vaccines;
+DROP VIEW spliced;
 
 # 4. Drop the vaccines column from the original
 ALTER TABLE country_vaccinations_cleaned

@@ -133,4 +133,6 @@ location, iso_code FROM location;
 ALTER TABLE location
 	DROP iso_code;
 ALTER TABLE country_vaccinations_cleaned
-	DROP iso_code;
+	DROP iso_code,
+    DROP source_name,
+    DROP source_website;
