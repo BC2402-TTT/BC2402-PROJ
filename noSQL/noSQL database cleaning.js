@@ -241,3 +241,27 @@ db.covid19data_2.find({human_development_index: {$exists: true}}).forEach(functi
 
 //verify that cleaning has been done, new columns of the appropriate datatype are created for covid19data_2
 db.covid19data_2.find() //columns that are cleaned are ended with _cleaned for consistency
+
+
+//Merging collections of country_vaccinations_by_manufacturer and covid19data_2 dataset
+db.covid19data_2.aggregate([
+    {$lookup:
+        {
+            from: "country_vaccinations_by_manufacturer",
+            let: {dates:"$date_cleaned",country:"$location"},
+            pipeline:[
+              { $match:
+                 { $expr:
+                    { $and:
+                       [
+                         { $eq: [ "$date_cleaned",  "$$dates" ] },
+                         { $eq: [ "$location", "$$country" ] }
+                       ]
+                    }
+                 }
+              }
+           ],
+            as: "vaccinations_by_manufacturer_data"
+        }
+    }
+])
