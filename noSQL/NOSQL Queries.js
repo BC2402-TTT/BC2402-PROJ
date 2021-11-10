@@ -131,10 +131,11 @@ db.country_vaccinations_cleaned.aggregate([
 
 /* 14. Specific to Singapore, display the daily total_vaccinations starting (inclusive) March-1 2021 through (inclusive) May-31 2021. */
 db.country_vaccinations_cleaned.aggregate([
-    {$match: { $and: [ {country: "Singapore"}, {date_cleaned: {$gte: ISODate("2021-03-01"), $lt: ISODate("2021-04-01")}}]}},
+    {$match: { $and: [ {country: "Singapore"}, {date_cleaned: {$gte: ISODate("2021-03-01"), $lte: ISODate("2021-05-31")}}]}},
     {$project: {_id:0, date_cleaned: 1, "daily_vaccinations": "$daily_vaccinations"}},
     {$sort: {"date_cleaned": 1}}
 ])
+
 
 /* 15. When is the first batch of vaccinations recorded in Singapore? */
 db.country_vaccinations_cleaned.aggregate([
