@@ -38,6 +38,7 @@ db.country_vac_with_covid19data.aggregate(
     {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne: []}}},
     {$unwind: "$vaccinations_by_manufacturer_data"},
     {$group: {_id: "$vaccinations_by_manufacturer_data.vaccine", date: {$min: "$date_cleaned"}}},
+    {$sort: {"date": 1}},
     {$project: {_id: 0, "vaccine": "$_id", "date": "$date"}}
 )
 
