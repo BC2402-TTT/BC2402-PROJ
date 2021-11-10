@@ -33,7 +33,7 @@ WHERE location IN ('Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanm
 ##	SELECT DISTINCT(source_name) as unique_data_sources
 ##	FROM sources
 ##	ORDER BY unique_data_sources;	
-# We get 147 rows instead of 91.
+# We get 147 rows instead of 92.
 SELECT DISTINCT(source_name) as unique_data_sources
 FROM location
 WHERE source_name IS NOT NULL #select is not null since sources is left-joined with locations
