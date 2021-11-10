@@ -156,7 +156,7 @@ LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D30_avail_vaccine
 LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D40_avail_vaccine 
 	FROM country_vaccinations_by_manufacturer_cleaned
 	WHERE location = 'Germany') d40 ON d40.date = c.DAY40 AND d40.vaccine = c.vaccine;
-
+#Here we display EACH individual vaccine available
 
 
 ##########################################################################################################
