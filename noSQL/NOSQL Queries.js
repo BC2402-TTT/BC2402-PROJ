@@ -168,9 +168,10 @@ db.country_vac_with_covid19data.aggregate([
     {$match: {vaccinations_by_manufacturer_data: {$exists: true, $ne: []}}},
     {$unwind: "$vaccinations_by_manufacturer_data"},
     {$project: {date: "$date_cleaned", "percentage_of_new_cases_(in %)": {$multiply: [{$divide: ["$new_cases_cleaned", "$population_cleaned"]}, 100]}, vaccine: "$vaccinations_by_manufacturer_data.vaccine", "percentage_of_total_vaccinations_(in %)": {$multiply: [{$divide: ["$vaccinations_by_manufacturer_data.total_vaccinations_cleaned", "$population_cleaned"]}, 100]}}},
-    {$project: {_id: 0, date: 1, "percentage_of_new_cases_(in %)": 1, vaccine: 1, "percentage_of_total_vaccinations_(in %)": 1}},
+    {$project: {_id: 0, date: 1, vaccine: "$vaccine", "percentage_of_new_cases_(in %)": "$percentage_of_new_cases_(in %)", "percentage_of_total_vaccinations_(in %)": "$percentage_of_total_vaccinations_(in %)"}},
     {$sort: {date: 1, vaccine: -1}}
 ])
+
 
 /* 19. Vaccination Drivers. Specific to Germany, based on each daily new case, display the total vaccinations of each available vaccines after 20 days, 30 days, and 40 days. */
 db.country_vac_with_covid19data.aggregate([
