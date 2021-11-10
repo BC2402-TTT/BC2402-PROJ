@@ -93,8 +93,8 @@ db.country_vaccinations_cleaned.aggregate([
             unit: "day"
         }
     }}},
-    {$sort: {date_diff: -1}},
-    {$project: {_id: 0, "country": "$_id", "days_to_over_50%": "$date_diff"}}
+    {$project: {_id: 0, "country": "$_id", "days_to_over_50%": "$date_diff"}},
+    {$sort: {"country": 1}}
 ])
 
 /* 10. Compute the global total of vaccinations per vaccine. */
