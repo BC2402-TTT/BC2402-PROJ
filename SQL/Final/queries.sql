@@ -169,6 +169,7 @@ LEFT JOIN(SELECT date, vaccine, total_vaccinations AS D40_avail_vaccine
 # without an ALGORITHM specified, the MERGE setting is automatically used where the statement 
 # retrieves parts of the view definition to replace corresponding parts of the statement in a view resolution.
 # This means that no extra space is required to store the view.
+#Here we accumulated the sum of vaccine instead of displaying them individually
 
 # View for sum of total_vaccinations across dates for Germany
 CREATE VIEW total AS
