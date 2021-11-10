@@ -333,7 +333,7 @@ CREATE TABLE vaccine AS
 ###    COUNT(DISTINCT excess_mortality)					 as excess_mortality
 ###FROM covid19data_cleaned
 ###GROUP BY location;
-# the attributes that have been commented out are the information attributes
+# the attributes that only return 1 for COUNT DISTINCT are the information attributes.
 
 # 1. Create locations table
 CREATE TABLE locations AS SELECT 
