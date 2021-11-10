@@ -211,5 +211,5 @@ FROM total_with_lagged_dates
 LEFT JOIN day21_cases ON total_with_lagged_dates.d21 = day21_cases.date 
 LEFT JOIN day60_cases ON total_with_lagged_dates.d60 = day60_cases.date
 LEFT JOIN day120_cases ON total_with_lagged_dates.d120 = day120_cases.date;
-DROP VIEW day120_cases, daexy21_cases, day60_cases, total, total_with_lagged_dates
+DROP VIEW day120_cases, day21_cases, day60_cases, total, total_with_lagged_dates
 
