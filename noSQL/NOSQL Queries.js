@@ -66,7 +66,7 @@ db.country_vac_with_covid19data.aggregate([
 db.country_vaccinations_cleaned.aggregate([
     {$group: {_id: {country: "$country"}, vaccines: {$max: "$vaccines"}, vaccination_percentage: {$max: "$people_fully_vaccinated_per_hundred_cleaned"}}},
     {$match: {"vaccination_percentage": {$gt: 60}}},
-    {$project: {_id: 0, "country":"$_id.country", vaccines: 1, vaccination_percentage: 1}},
+    {$project: {_id: 0, "country":"$_id.country", "vaccines": "$vaccines", "vaccination_percentage": "$vaccination_percentage"}},
     {$sort: {vaccination_percentage: -1}}
 ])
 
